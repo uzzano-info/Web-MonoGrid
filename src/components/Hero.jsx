@@ -1,5 +1,5 @@
-import React from 'react';
 import { motion } from 'framer-motion';
+import heroBg from '../assets/hero-bg.jpg';
 
 const Hero = () => {
     return (
@@ -8,8 +8,8 @@ const Hero = () => {
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-designer-bg/50 to-designer-bg z-10" />
                 <img
-                    src="https://images.pexels.com/photos/1743387/pexels-photo-1743387.jpeg?auto=compress&cs=tinysrgb&w=1600"
-                    alt="Hero Background"
+                    src={heroBg}
+                    alt="MonoGrid Hero Background"
                     className="w-full h-full object-cover opacity-60 scale-105 animate-pulse-slow"
                 />
             </div>
