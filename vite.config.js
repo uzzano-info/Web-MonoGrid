@@ -4,17 +4,18 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  base: '/Web-MonoGrid/',
   plugins: [
     react(),
     VitePWA({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'masked-icon.svg'],
       manifest: {
-        name: 'Pexels Designer Hub',
-        short_name: 'Pexels Hub',
-        description: 'Curated Inspiration for Designers',
-        theme_color: '#121212',
-        background_color: '#121212',
+        name: 'MonoGrid',
+        short_name: 'MonoGrid',
+        description: 'Free multi-image collection board',
+        theme_color: '#1C1B1A',
+        background_color: '#1C1B1A',
         display: 'standalone',
         icons: [
           {
