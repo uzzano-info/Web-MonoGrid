@@ -12,37 +12,40 @@ const ActionDock = ({ selectedCount, onClear, onDownload, processing, onAddToCol
                     exit={{ y: 100, opacity: 0 }}
                     className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-50 px-4 w-full max-w-lg"
                 >
-                    <div className="bg-designer-card border border-designer-border rounded-2xl shadow-2xl px-6 py-4 flex items-center justify-between backdrop-blur-lg">
-                        <div className="flex items-center gap-4">
-                            <span className="bg-designer-accent text-designer-bg w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-lg shadow-designer-accent/10">
-                                {selectedCount}
-                            </span>
-                            <div className="flex flex-col">
-                                <span className="text-designer-text font-bold text-sm">
-                                    Selection
+                    <div className="bg-designer-card border border-designer-border rounded-2xl shadow-2xl px-6 py-4 flex flex-col gap-4 backdrop-blur-lg">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-4">
+                                <span className="bg-designer-accent text-designer-bg w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-lg shadow-designer-accent/10">
+                                    {selectedCount}
                                 </span>
-                                <button
-                                    onClick={onClear}
-                                    className="text-designer-error text-[10px] font-bold uppercase tracking-widest text-left hover:opacity-80 transition-opacity"
-                                >
-                                    Clear all
-                                </button>
+                                <div className="flex flex-col">
+                                    <span className="text-designer-text font-bold text-sm">
+                                        Selection
+                                    </span>
+                                    <button
+                                        onClick={onClear}
+                                        className="text-designer-error text-[10px] font-bold uppercase tracking-widest text-left hover:opacity-80 transition-opacity"
+                                    >
+                                        Clear all
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="grid grid-cols-3 gap-3 w-full">
                             <button
                                 onClick={onAddToCollection}
-                                className="text-designer-muted hover:text-designer-text transition-colors p-2.5 bg-designer-bg/50 rounded-xl border border-designer-border hover:border-designer-muted"
+                                className="col-span-1 bg-designer-bg text-designer-accent border-2 border-designer-accent/20 hover:border-designer-accent hover:bg-designer-accent/5 rounded-xl font-bold text-xs flex flex-col items-center justify-center gap-1 py-2 transition-all shadow-sm active:scale-95 uppercase tracking-wider"
                                 title="Add to Collection"
                             >
-                                <FolderPlus size={20} />
+                                <FolderPlus size={18} />
+                                <span>Add</span>
                             </button>
 
                             <button
                                 onClick={onDownload}
                                 disabled={processing}
-                                className="bg-designer-accent text-designer-bg px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-designer-accent-hover transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-95"
+                                className="col-span-2 bg-designer-accent text-designer-bg rounded-xl font-bold text-sm hover:bg-designer-accent-hover transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg active:scale-95 py-3"
                             >
                                 {processing ? (
                                     <span className="animate-pulse">Processing...</span>

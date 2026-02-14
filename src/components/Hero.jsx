@@ -27,10 +27,15 @@ const Hero = () => {
                     <h1 className="text-5xl md:text-7xl font-bold text-designer-text mb-6 tracking-tight">
                         Mono<span className="text-designer-accent">Grid</span>
                     </h1>
-                    <p className="text-xl text-designer-secondary mb-8 max-w-2xl mx-auto leading-relaxed">
-                        Free multi-image collection board.
-                        Search, curate, and bulk download high-resolution assets for your creative projects.
-                    </p>
+                    <div className="flex flex-col gap-4">
+                        <p className="text-xl text-designer-secondary mb-2 max-w-2xl mx-auto leading-relaxed">
+                            Free multi-image collection board.
+                            Search, curate, and bulk download high-resolution assets for your creative projects.
+                        </p>
+                        <p className="text-sm text-designer-muted font-medium opacity-60">
+                            Source: Pexels
+                        </p>
+                    </div>
                 </motion.div>
             </div>
         </div>

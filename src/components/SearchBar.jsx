@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Search, Monitor, Smartphone, Square, Check, X } from 'lucide-react';
 
 const COLORS = [
-    { name: 'Red', hex: 'e91e63' },
+    { name: 'Red', hex: 'FF2600' },
     { name: 'Orange', hex: 'fb8c00' },
     { name: 'Yellow', hex: 'fdd835' },
     { name: 'Green', hex: '43a047' },

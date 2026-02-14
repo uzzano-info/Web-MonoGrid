@@ -135,9 +135,10 @@ function Home() {
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => openCollectionModal([])}
-                            className="text-designer-muted hover:text-designer-text text-sm flex items-center gap-2 transition-colors font-medium group"
+                            className="bg-designer-accent text-designer-bg px-4 py-2 rounded-lg text-sm font-bold hover:bg-designer-accent-hover transition-all flex items-center gap-2 shadow-lg active:scale-95"
                         >
-                            <FolderPlus size={18} className="group-hover:scale-110 transition-transform" /> Collections
+                            <FolderPlus size={18} />
+                            <span>Collections</span>
                         </button>
                         <div className="h-4 w-px bg-designer-border"></div>
                         <div className="text-sm font-medium text-designer-muted bg-designer-card px-3 py-1 rounded-full border border-designer-border">

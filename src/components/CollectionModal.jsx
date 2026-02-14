@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { X, Plus, Folder } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import useCollectionStore from '../store/useCollectionStore';
 
 const CollectionModal = ({ isOpen, onClose, photosToAdd }) => {
+    const navigate = useNavigate();
     const { collections, addCollection, addToCollection } = useCollectionStore();
     const [newCollectionName, setNewCollectionName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
@@ -40,7 +42,7 @@ const CollectionModal = ({ isOpen, onClose, photosToAdd }) => {
                             className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-designer-card border border-transparent hover:border-designer-border transition-all text-left group cursor-pointer"
                             onClick={(e) => {
                                 if (e.target.closest('button')) return;
-                                window.location.href = `/collections/${col.id}`;
+                                navigate(`/collections/${col.id}`);
                             }}
                         >
                             <div className="w-12 h-12 bg-designer-bg rounded-lg flex items-center justify-center text-designer-muted group-hover:text-designer-accent shrink-0 border border-designer-border overflow-hidden">
