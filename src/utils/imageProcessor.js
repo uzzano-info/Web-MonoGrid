@@ -67,3 +67,18 @@ export const convertImageFormat = async (blob, format) => {
         img.src = url;
     });
 };
+
+/**
+ * Mocks background removal by adding a processing delay and returning the blob.
+ * In a real app, this would use a library like @imgly/background-removal or an API.
+ * @param {Blob} blob - The image blob.
+ * @returns {Promise<Blob>} A promise that resolves to the processed blob.
+ */
+export const removeBackgroundMock = async (blob) => {
+    // Simulate AI processing time
+    await new Promise(resolve => setTimeout(resolve, 800));
+
+    // For now, we just return the original blob. 
+    // In a "real" mock, we could draw it on canvas and clear corners, but this is enough for the UI demo.
+    return blob;
+};

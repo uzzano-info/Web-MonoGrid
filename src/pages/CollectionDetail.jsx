@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check } from 'lucide-react';
+import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check, X } from 'lucide-react';
 import useCollectionStore from '../store/useCollectionStore';
 import { downloadPhotosAsZip } from '../utils/downloadZip';
 
@@ -16,7 +16,7 @@ const CollectionDetail = () => {
     // Batch Config State
     const [format, setFormat] = useState('JPG');
     const [size, setSize] = useState('Original');
-    const [orientation, setOrientation] = useState('');
+    const [bgRemoval, setBgRemoval] = useState(false);
     const [itemsToShow, setItemsToShow] = useState(20);
     const [viewMode, setViewMode] = useState('grid');
 
@@ -29,17 +29,7 @@ const CollectionDetail = () => {
 
     if (!collection) return <div className="min-h-screen bg-designer-bg flex items-center justify-center text-white">Loading...</div>;
 
-    // Filter Logic
-    const filteredPhotos = collection.photos.filter(p => {
-        if (!orientation) return true;
-        const ratio = p.width / p.height;
-        if (orientation === 'landscape') return ratio > 1.2;
-        if (orientation === 'portrait') return ratio < 0.8;
-        if (orientation === 'square') return ratio >= 0.8 && ratio <= 1.2;
-        return true;
-    });
-
-    const displayedPhotos = filteredPhotos.slice(0, itemsToShow);
+    const displayedPhotos = collection.photos.slice(0, itemsToShow);
 
     const toggleSelect = (photoId) => {
         if (selectedPhotos.includes(photoId)) {
@@ -50,31 +40,66 @@ const CollectionDetail = () => {
     };
 
     const toggleSelectAll = () => {
-        if (selectedPhotos.length === filteredPhotos.length && filteredPhotos.length > 0) {
+        if (selectedPhotos.length === collection.photos.length && collection.photos.length > 0) {
             setSelectedPhotos([]);
         } else {
-            setSelectedPhotos(filteredPhotos.map(p => p.id));
+            setSelectedPhotos(collection.photos.map(p => p.id));
         }
     };
 
     const handleScroll = (e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         if (scrollHeight - scrollTop <= clientHeight + 100) {
-            if (itemsToShow < filteredPhotos.length) {
+            if (itemsToShow < collection.photos.length) {
                 setItemsToShow(prev => prev + 20);
             }
         }
+    };
+
+    const getPayloadFilename = () => {
+        const name = collection.name || 'collection';
+        const baseName = name.replace(/\s+/g, '-').toLowerCase();
+        const suffix = bgRemoval ? '_bg_removed' : '';
+        return `${baseName}${suffix}-${size}-${format}.zip`.toUpperCase();
+    };
+
+    const getPayloadSize = () => {
+        const count = selectedPhotos.length;
+        if (count === 0) return '0 MB';
+
+        // Size Multipliers
+        const scaleMult = {
+            'Original': 1.0,
+            'Large': 0.6,
+            'Medium': 0.3,
+            'Small': 0.1
+        }[size] || 1.0;
+
+        const formatMult = {
+            'JPG': 1.0,
+            'PNG': 1.6, // PNG is significantly larger
+            'WEBP': 0.7
+        }[format] || 1.0;
+
+        const bgMult = bgRemoval ? 1.2 : 1.0; // Simulated overhead for transparency/processing
+
+        const baseSizePerPhotoMB = 4.2; // Slightly more realistic base for Pexels Original
+        const estimatedSize = count * baseSizePerPhotoMB * scaleMult * formatMult * bgMult;
+
+        if (estimatedSize < 1) return `~${(estimatedSize * 1024).toFixed(0)} KB`;
+        return `~${estimatedSize.toFixed(1)} MB`;
     };
 
     const handleDownload = async () => {
         if (selectedPhotos.length === 0) return;
         setProcessing(true);
         const photosToDownload = collection.photos.filter(p => selectedPhotos.includes(p.id));
+        const filename = getPayloadFilename().toLowerCase();
 
         await downloadPhotosAsZip(
             photosToDownload,
-            `${collection.name.replace(/\s+/g, '-').toLowerCase()}-${size}-${format}.zip`,
-            { size, format }
+            filename,
+            { size, format, bgRemoval }
         );
 
         setProcessing(false);
@@ -82,7 +107,6 @@ const CollectionDetail = () => {
 
     return (
         <div className="min-h-screen bg-designer-bg text-designer-text font-sans flex flex-col md:flex-row overflow-hidden fixed inset-0">
-
             {/* Main Content Area */}
             <div className="flex-1 flex flex-col h-full relative z-10">
                 {/* Header */}
@@ -104,20 +128,12 @@ const CollectionDetail = () => {
                         <label className="flex items-center gap-2 cursor-pointer text-designer-muted hover:text-designer-text transition-colors select-none">
                             <input
                                 type="checkbox"
-                                checked={selectedPhotos.length === filteredPhotos.length && filteredPhotos.length > 0}
+                                checked={selectedPhotos.length === collection.photos.length && collection.photos.length > 0}
                                 onChange={toggleSelectAll}
                                 className="rounded border-designer-border bg-transparent text-designer-accent focus:ring-offset-designer-bg focus:ring-designer-accent"
                             />
-                            Select All ({filteredPhotos.length})
+                            Select All ({collection.photos.length})
                         </label>
-                        <div className="flex items-center gap-2 ml-4">
-                            <span className="text-[10px] font-bold text-designer-muted uppercase tracking-widest">Filters:</span>
-                            {orientation && (
-                                <span className="bg-designer-accent text-designer-bg text-[10px] px-2 py-0.5 rounded border border-designer-accent flex items-center gap-1 font-bold uppercase animate-in fade-in zoom-in-50 shadow-sm">
-                                    {orientation} <X size={10} className="cursor-pointer" onClick={() => setOrientation('')} />
-                                </span>
-                            )}
-                        </div>
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-designer-muted uppercase mr-2 tracking-tighter">View Context:</span>
@@ -204,7 +220,7 @@ const CollectionDetail = () => {
                         </div>
                     )}
 
-                    {itemsToShow < filteredPhotos.length && (
+                    {itemsToShow < collection.photos.length && (
                         <div className="text-center py-10 text-designer-muted text-[10px] font-bold uppercase tracking-[0.3em] animate-pulse">
                             Indexing assets // scanning archive...
                         </div>
@@ -214,7 +230,7 @@ const CollectionDetail = () => {
                 {/* Footer Status */}
                 <div className="px-6 py-2 border-t border-designer-border text-[10px] text-designer-muted font-bold uppercase tracking-widest flex justify-between shrink-0 bg-designer-bg absolute bottom-0 left-0 right-0 z-20">
                     <span>System Status: Online // Mode: Minimalist</span>
-                    <span>Rendered: {displayedPhotos.length} / Active: {selectedPhotos.length} / Global: {filteredPhotos.length}</span>
+                    <span>Rendered: {displayedPhotos.length} / Active: {selectedPhotos.length} / Global: {collection.photos.length}</span>
                 </div>
             </div>
 
@@ -228,25 +244,25 @@ const CollectionDetail = () => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
-                    {/* Orientation Visualization */}
+                    {/* Background Removal Toggle */}
                     <div className="bg-designer-bg/50 rounded-2xl p-5 border border-designer-border">
-                        <label className="text-[10px] font-black text-designer-muted uppercase tracking-[0.2em] mb-4 block">Frame Orientation</label>
-                        <div className="grid grid-cols-3 gap-2">
-                            {[
-                                { id: 'landscape', icon: Monitor, label: 'Wide' },
-                                { id: 'portrait', icon: Smartphone, label: 'Tall' },
-                                { id: 'square', icon: Square, label: 'Square' }
-                            ].map(opt => (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => setOrientation(orientation === opt.id ? '' : opt.id)}
-                                    className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${orientation === opt.id ? 'bg-designer-accent text-designer-bg border-designer-accent shadow-lg' : 'bg-transparent border-designer-border text-designer-muted hover:border-designer-muted hover:text-designer-text'}`}
-                                >
-                                    <opt.icon size={18} className={orientation === opt.id ? 'text-designer-bg' : ''} />
-                                    <span className="text-[10px] mt-2 font-bold uppercase">{opt.label}</span>
-                                </button>
-                            ))}
+                        <label className="text-[10px] font-black text-designer-muted uppercase tracking-[0.2em] mb-4 block">Background Removal</label>
+                        <div
+                            onClick={() => setBgRemoval(!bgRemoval)}
+                            className={`relative w-full h-12 rounded-xl border cursor-pointer transition-all flex items-center px-4 ${bgRemoval ? 'bg-designer-accent border-designer-accent shadow-lg' : 'bg-designer-bg border-designer-border hover:border-designer-muted'}`}
+                        >
+                            <div className="flex-1">
+                                <span className={`text-xs font-bold uppercase tracking-widest ${bgRemoval ? 'text-designer-bg' : 'text-designer-text'}`}>
+                                    {bgRemoval ? 'Enabled' : 'Disabled'}
+                                </span>
+                            </div>
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${bgRemoval ? 'bg-designer-bg text-designer-accent translate-x-0' : 'bg-designer-muted/20 text-designer-muted'}`}>
+                                {bgRemoval ? <Check size={14} strokeWidth={3} /> : <X size={14} />}
+                            </div>
                         </div>
+                        <p className="text-[9px] text-designer-muted mt-3 font-medium opacity-60">
+                            * Automatically removes backgrounds using AI. Increases processing time.
+                        </p>
                     </div>
 
                     {/* Format Section */}
@@ -308,10 +324,10 @@ const CollectionDetail = () => {
                     <div className="bg-designer-bg rounded-2xl p-5 border border-designer-border mb-4 shadow-inner">
                         <p className="text-[10px] text-designer-muted font-bold mb-2 uppercase tracking-widest text-center opacity-70">Projected Payload</p>
                         <div className="flex justify-between items-center">
-                            <h3 className="text-2xl font-black text-designer-text tracking-tighter">~48.2 MB</h3>
-                            <div className="text-right">
+                            <h3 className="text-2xl font-black text-designer-text tracking-tighter">{getPayloadSize()}</h3>
+                            <div className="text-right flex flex-col items-end">
                                 <p className="text-xs text-designer-accent font-black uppercase">{selectedPhotos.length} Units</p>
-                                <p className="text-[10px] text-designer-muted font-bold tracking-tighter">ARCHIVE.ZIP</p>
+                                <p className="text-[8px] text-designer-muted font-bold tracking-tighter max-w-[120px] truncate">{getPayloadFilename()}</p>
                             </div>
                         </div>
                     </div>

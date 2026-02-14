@@ -70,7 +70,12 @@ const CollectionModal = ({ isOpen, onClose, photosToAdd }) => {
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
-                                    handleAddToCollection(col.id);
+                                    if (photosToAdd.length > 0) {
+                                        handleAddToCollection(col.id);
+                                    } else {
+                                        navigate(`/collections/${col.id}`);
+                                        onClose();
+                                    }
                                 }}
                                 className="bg-designer-accent text-designer-bg px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-designer-accent-hover transition-colors shadow-lg active:scale-95"
                             >

@@ -3,7 +3,7 @@ import heroBg from '../assets/hero-bg.jpg';
 
 const Hero = () => {
     return (
-        <div className="relative h-[60vh] min-h-[400px] w-full flex items-center justify-center overflow-hidden mb-12">
+        <div className="relative h-[45vh] min-h-[300px] w-full flex items-center justify-center overflow-hidden mb-12">
             {/* Dynamic Background */}
             <div className="absolute inset-0 z-0">
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-designer-bg/50 to-designer-bg z-10" />
@@ -29,9 +29,11 @@ const Hero = () => {
                             Free multi-image collection board.
                             Search, curate, and bulk download high-resolution assets for your creative projects.
                         </p>
-                        <p className="text-xs text-designer-muted font-medium opacity-60 uppercase tracking-widest">
-                            Powered by Pexels API
-                        </p>
+                        <div className="mt-8">
+                            <span className="inline-block bg-black/50 backdrop-blur-md border border-white/10 px-4 py-1.5 rounded-full text-[10px] font-medium text-white/70 uppercase tracking-widest hover:bg-black/70 transition-colors cursor-default">
+                                Powered by Pexels API
+                            </span>
+                        </div>
                     </div>
                 </motion.div>
             </div>

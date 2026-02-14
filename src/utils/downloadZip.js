@@ -1,8 +1,8 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { getImageUrlBySize, convertImageFormat } from './imageProcessor';
+import { getImageUrlBySize, convertImageFormat, removeBackgroundMock } from './imageProcessor';
 
-export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.zip', options = { size: 'Original', format: 'JPG' }) => {
+export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.zip', options = { size: 'Original', format: 'JPG', bgRemoval: false }) => {
     const zip = new JSZip();
     const folder = zip.folder('photos');
 
@@ -19,16 +19,19 @@ export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.
             const targetUrl = getImageUrlBySize(photo.src, options.size);
 
             // 2. Fetch Blob
-            const originalBlob = await fetchBlob(targetUrl);
+            let blob = await fetchBlob(targetUrl);
 
-            // 3. Convert Format if needed
-            // If fetching Original (which might be huge), converting on canvas might crash if too big.
-            // But for this demo we assume it works.
-            const convertedBlob = await convertImageFormat(originalBlob, options.format);
+            // 3. Background Removal (Simulation)
+            if (options.bgRemoval) {
+                blob = await removeBackgroundMock(blob);
+            }
 
-            // 4. Determine extension
+            // 4. Convert Format if needed
+            const convertedBlob = await convertImageFormat(blob, options.format);
+
+            // 5. Determine extension
             const extension = options.format.toLowerCase();
-            const name = `${photo.id}-${photo.photographer.replace(/\s+/g, '-').toLowerCase()}.${extension}`;
+            const name = `${photo.id}-${photo.photographer.replace(/\s+/g, '-').toLowerCase()}${options.bgRemoval ? '_bg_removed' : ''}.${extension}`;
 
             folder.file(name, convertedBlob);
         } catch (error) {
