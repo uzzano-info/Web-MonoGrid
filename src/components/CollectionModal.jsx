@@ -26,8 +26,14 @@ const CollectionModal = ({ isOpen, onClose, photosToAdd }) => {
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4">
-            <div className="bg-designer-modal border border-designer-border w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4"
+            onClick={onClose}
+        >
+            <div
+                className="bg-designer-modal border border-designer-border w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="flex justify-between items-center p-5 border-b border-designer-border bg-designer-card/50">
                     <h3 className="text-lg font-bold text-designer-text tracking-tight uppercase tracking-widest text-xs opacity-70">Archive Management</h3>
                     <button onClick={onClose} className="text-designer-muted hover:text-designer-text transition-colors">
@@ -42,7 +48,12 @@ const CollectionModal = ({ isOpen, onClose, photosToAdd }) => {
                             className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-designer-card border border-transparent hover:border-designer-border transition-all text-left group cursor-pointer"
                             onClick={(e) => {
                                 if (e.target.closest('button')) return;
-                                navigate(`/collections/${col.id}`);
+                                if (photosToAdd.length > 0) {
+                                    handleAddToCollection(col.id);
+                                } else {
+                                    navigate(`/collections/${col.id}`);
+                                    onClose(); // Close modal after navigation
+                                }
                             }}
                         >
                             <div className="w-12 h-12 bg-designer-bg rounded-lg flex items-center justify-center text-designer-muted group-hover:text-designer-accent shrink-0 border border-designer-border overflow-hidden">

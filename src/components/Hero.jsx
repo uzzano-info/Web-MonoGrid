@@ -21,9 +21,6 @@ const Hero = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.8 }}
                 >
-                    <span className="inline-block px-4 py-1.5 rounded-full bg-designer-card text-designer-muted text-sm font-semibold mb-6 backdrop-blur-md border border-designer-border shadow-sm">
-                        Powered by Pexels API
-                    </span>
                     <h1 className="text-5xl md:text-7xl font-bold text-designer-text mb-6 tracking-tight">
                         Mono<span className="text-designer-accent">Grid</span>
                     </h1>
@@ -32,8 +29,8 @@ const Hero = () => {
                             Free multi-image collection board.
                             Search, curate, and bulk download high-resolution assets for your creative projects.
                         </p>
-                        <p className="text-sm text-designer-muted font-medium opacity-60">
-                            Source: Pexels
+                        <p className="text-xs text-designer-muted font-medium opacity-60 uppercase tracking-widest">
+                            Powered by Pexels API
                         </p>
                     </div>
                 </motion.div>

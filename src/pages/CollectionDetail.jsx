@@ -18,6 +18,7 @@ const CollectionDetail = () => {
     const [size, setSize] = useState('Original');
     const [orientation, setOrientation] = useState('');
     const [itemsToShow, setItemsToShow] = useState(20);
+    const [viewMode, setViewMode] = useState('grid');
 
     useEffect(() => {
         const found = collections.find(c => c.id === id);
@@ -120,47 +121,88 @@ const CollectionDetail = () => {
                     </div>
                     <div className="flex items-center gap-2">
                         <span className="text-xs text-designer-muted uppercase mr-2 tracking-tighter">View Context:</span>
-                        <button className="p-1.5 hover:bg-designer-modal rounded-md text-designer-muted hover:text-designer-text transition-colors"><List size={16} /></button>
-                        <button className="p-1.5 bg-designer-card border border-designer-border text-designer-accent rounded-md"><Grid size={16} /></button>
+                        <button
+                            onClick={() => setViewMode('list')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'list' ? 'bg-designer-card border border-designer-border text-designer-accent' : 'text-designer-muted hover:text-designer-text hover:bg-designer-modal'}`}
+                        >
+                            <List size={16} />
+                        </button>
+                        <button
+                            onClick={() => setViewMode('grid')}
+                            className={`p-1.5 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-designer-card border border-designer-border text-designer-accent' : 'text-designer-muted hover:text-designer-text hover:bg-designer-modal'}`}
+                        >
+                            <Grid size={16} />
+                        </button>
                     </div>
                 </div>
 
-                {/* Grid Grid */}
+                {/* Content Area */}
                 <div
                     ref={scrollRef}
                     onScroll={handleScroll}
                     className="flex-1 overflow-y-auto p-6 bg-designer-bg custom-scrollbar"
                 >
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-20">
-                        {displayedPhotos.map(photo => {
-                            const isSelected = selectedPhotos.includes(photo.id);
-                            return (
-                                <div
-                                    key={photo.id}
-                                    onClick={() => toggleSelect(photo.id)}
-                                    className={`aspect-square bg-designer-card rounded-xl border p-2 group relative cursor-pointer transition-all duration-300 ${isSelected ? 'border-designer-accent shadow-[0_0_20px_rgba(230,228,224,0.1)] ring-1 ring-designer-accent' : 'border-designer-border hover:border-designer-muted'}`}
-                                >
-                                    <div className="w-full h-full rounded-lg overflow-hidden relative bg-[#0f0f0f]">
-                                        <img src={photo.src.large} alt={photo.alt} className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? 'scale-90 opacity-60' : 'group-hover:scale-110'}`} />
+                    {viewMode === 'grid' ? (
+                        /* Grid View */
+                        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-20">
+                            {displayedPhotos.map(photo => {
+                                const isSelected = selectedPhotos.includes(photo.id);
+                                return (
+                                    <div
+                                        key={photo.id}
+                                        onClick={() => toggleSelect(photo.id)}
+                                        className={`aspect-square bg-designer-card rounded-xl border p-2 group relative cursor-pointer transition-all duration-300 ${isSelected ? 'border-designer-accent shadow-[0_0_20px_rgba(230,228,224,0.1)] ring-1 ring-designer-accent' : 'border-designer-border hover:border-designer-muted'}`}
+                                    >
+                                        <div className="w-full h-full rounded-lg overflow-hidden relative bg-[#0f0f0f]">
+                                            <img src={photo.src.large} alt={photo.alt} className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? 'scale-90 opacity-60' : 'group-hover:scale-110'}`} />
 
-                                        <div className={`absolute inset-0 bg-designer-accent/5 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0'}`}></div>
+                                            <div className={`absolute inset-0 bg-designer-accent/5 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0'}`}></div>
 
-                                        {/* Checkbox Overlay */}
-                                        <div className={`absolute top-2 left-2 transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-90 group-hover:opacity-100'}`}>
-                                            <div className={`w-6 h-6 rounded-lg flex items-center justify-center border shadow-lg ${isSelected ? 'bg-designer-accent text-designer-bg border-designer-accent' : 'bg-designer-bg/50 border-white/20 backdrop-blur-md'}`}>
-                                                {isSelected && <Check size={14} strokeWidth={3} />}
+                                            {/* Checkbox Overlay */}
+                                            <div className={`absolute top-2 left-2 transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-90 group-hover:opacity-100'}`}>
+                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center border shadow-lg ${isSelected ? 'bg-designer-accent text-designer-bg border-designer-accent' : 'bg-designer-bg/50 border-white/20 backdrop-blur-md'}`}>
+                                                    {isSelected && <Check size={14} strokeWidth={3} />}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            );
-                        })}
-
-                        {/* Extra placeholders if few items */}
-                        {displayedPhotos.length < 10 && Array.from({ length: 10 - displayedPhotos.length }).map((_, i) => (
-                            <div key={`empty-${i}`} className="aspect-square bg-designer-card/20 rounded-xl border border-designer-border opacity-20"></div>
-                        ))}
-                    </div>
+                                );
+                            })}
+                            {displayedPhotos.length < 10 && Array.from({ length: 10 - displayedPhotos.length }).map((_, i) => (
+                                <div key={`empty-${i}`} className="aspect-square bg-designer-card/20 rounded-xl border border-designer-border opacity-20"></div>
+                            ))}
+                        </div>
+                    ) : (
+                        /* List View */
+                        <div className="flex flex-col gap-2 pb-20">
+                            {displayedPhotos.map(photo => {
+                                const isSelected = selectedPhotos.includes(photo.id);
+                                return (
+                                    <div
+                                        key={photo.id}
+                                        onClick={() => toggleSelect(photo.id)}
+                                        className={`flex items-center gap-4 bg-designer-card p-2 rounded-xl border transition-all cursor-pointer group ${isSelected ? 'border-designer-accent bg-designer-accent/5' : 'border-designer-border hover:border-designer-muted'}`}
+                                    >
+                                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/20 shrink-0 relative">
+                                            <img src={photo.src.tiny} alt={photo.alt} className="w-full h-full object-cover" />
+                                            {isSelected && (
+                                                <div className="absolute inset-0 bg-designer-accent/20 flex items-center justify-center">
+                                                    <Check size={16} className="text-designer-bg drop-shadow-md" strokeWidth={3} />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="font-bold text-designer-text truncate text-sm">{photo.alt || 'Untitled Asset'}</h4>
+                                            <p className="text-xs text-designer-muted">by {photo.photographer}</p>
+                                        </div>
+                                        <div className="px-4 text-[10px] font-mono text-designer-muted">
+                                            {photo.width} x {photo.height}
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
 
                     {itemsToShow < filteredPhotos.length && (
                         <div className="text-center py-10 text-designer-muted text-[10px] font-bold uppercase tracking-[0.3em] animate-pulse">
