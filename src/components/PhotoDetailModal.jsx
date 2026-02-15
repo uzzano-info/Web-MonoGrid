@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, ExternalLink, Download, FolderPlus, User, Loader2 } from 'lucide-react';
+import { X, ExternalLink, Download, FolderPlus, Loader2 } from 'lucide-react';
 import { searchPhotos } from '../api/pexels';
 
 const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollection }) => {

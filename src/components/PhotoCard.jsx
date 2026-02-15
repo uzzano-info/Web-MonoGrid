@@ -26,9 +26,9 @@ const PhotoCard = ({ photo, isSelected, onToggleSelect, onDownload, onPhotoClick
                             e.stopPropagation();
                             onToggleSelect(photo);
                         }}
-                        className={`p-3 rounded-xl backdrop-blur-md transition-all border ${isSelected ? 'bg-designer-accent text-designer-bg border-designer-accent shadow-lg' : 'bg-designer-bg/30 text-designer-text border-white/10 hover:bg-designer-accent hover:text-designer-bg hover:border-designer-accent'}`}
+                        className={`p-4 rounded-xl backdrop-blur-md transition-all border ${isSelected ? 'bg-designer-accent text-designer-bg border-designer-accent shadow-lg' : 'bg-designer-bg/30 text-designer-text border-white/10 hover:bg-designer-accent hover:text-designer-bg hover:border-designer-accent'}`}
                     >
-                        {isSelected ? <Check size={18} strokeWidth={3} /> : <Plus size={18} strokeWidth={3} />}
+                        {isSelected ? <Check size={24} strokeWidth={2} /> : <Plus size={24} strokeWidth={2} />}
                     </button>
                 </div>
 
@@ -46,10 +46,10 @@ const PhotoCard = ({ photo, isSelected, onToggleSelect, onDownload, onPhotoClick
                             e.stopPropagation();
                             onDownload(photo);
                         }}
-                        className="p-3 bg-designer-bg/30 hover:bg-designer-accent text-designer-text hover:text-designer-bg rounded-xl backdrop-blur-md transition-all border border-white/10 hover:border-designer-accent"
+                        className="p-4 bg-designer-bg/30 hover:bg-designer-accent text-designer-text hover:text-designer-bg rounded-xl backdrop-blur-md transition-all border border-white/10 hover:border-designer-accent"
                         title="Download Asset"
                     >
-                        <Download size={18} />
+                        <Download size={24} />
                     </button>
                 </div>
             </div>
