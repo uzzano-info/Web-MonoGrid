@@ -57,4 +57,5 @@ const PhotoCard = ({ photo, isSelected, onToggleSelect, onDownload, onPhotoClick
     );
 };
 
+
 export default PhotoCard;
