@@ -68,22 +68,4 @@ export const convertImageFormat = async (blob, format) => {
     });
 };
 
-import imglyRemoveBackground from "@imgly/background-removal";
 
-/**
- * Removes the background from an image blob using @imgly/background-removal.
- * @param {Blob} blob - The image blob.
- * @returns {Promise<Blob>} A promise that resolves to the processed blob (PNG).
- */
-export const removeBackground = async (blob) => {
-    try {
-        // Convert blob to URL for imgly (it accepts blob URL or various other inputs)
-        const url = URL.createObjectURL(blob);
-        const processedBlob = await imglyRemoveBackground(url);
-        URL.revokeObjectURL(url);
-        return processedBlob;
-    } catch (error) {
-        console.error("Background removal failed:", error);
-        throw error;
-    }
-};
