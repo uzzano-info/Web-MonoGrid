@@ -4,7 +4,7 @@ import CollectionDetail from './pages/CollectionDetail';
 
 function App() {
   return (
-    <Router basename="/Web-MonoGrid/">
+    <Router basename={import.meta.env.BASE_URL}>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/collections/:id" element={<CollectionDetail />} />
