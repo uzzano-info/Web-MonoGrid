@@ -191,6 +191,7 @@ function Home() {
                 onClose={() => setSelectedPhotoForDetail(null)}
                 onDownload={handleDownload}
                 onAddToCollection={(p) => openCollectionModal([p])}
+                onSelectPhoto={setSelectedPhotoForDetail}
             />
         </div>
     );

@@ -16,7 +16,7 @@ const CollectionDetail = () => {
     // Batch Config State
     const [format, setFormat] = useState('JPG');
     const [size, setSize] = useState('Original');
-    const [bgRemoval, setBgRemoval] = useState(false);
+
     const [itemsToShow, setItemsToShow] = useState(20);
     const [viewMode, setViewMode] = useState('grid');
 
@@ -59,35 +59,7 @@ const CollectionDetail = () => {
     const getPayloadFilename = () => {
         const name = collection.name || 'collection';
         const baseName = name.replace(/\s+/g, '-').toLowerCase();
-        const suffix = bgRemoval ? '_bg_removed' : '';
-        return `${baseName}${suffix}-${size}-${format}.zip`.toUpperCase();
-    };
-
-    const getPayloadSize = () => {
-        const count = selectedPhotos.length;
-        if (count === 0) return '0 MB';
-
-        // Size Multipliers
-        const scaleMult = {
-            'Original': 1.0,
-            'Large': 0.6,
-            'Medium': 0.3,
-            'Small': 0.1
-        }[size] || 1.0;
-
-        const formatMult = {
-            'JPG': 1.0,
-            'PNG': 1.6, // PNG is significantly larger
-            'WEBP': 0.7
-        }[format] || 1.0;
-
-        const bgMult = bgRemoval ? 1.2 : 1.0; // Simulated overhead for transparency/processing
-
-        const baseSizePerPhotoMB = 4.2; // Slightly more realistic base for Pexels Original
-        const estimatedSize = count * baseSizePerPhotoMB * scaleMult * formatMult * bgMult;
-
-        if (estimatedSize < 1) return `~${(estimatedSize * 1024).toFixed(0)} KB`;
-        return `~${estimatedSize.toFixed(1)} MB`;
+        return `${baseName}-${size}-${format}.zip`.toUpperCase();
     };
 
     const handleDownload = async () => {
@@ -99,7 +71,7 @@ const CollectionDetail = () => {
         await downloadPhotosAsZip(
             photosToDownload,
             filename,
-            { size, format, bgRemoval }
+            { size, format }
         );
 
         setProcessing(false);
@@ -244,26 +216,7 @@ const CollectionDetail = () => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
-                    {/* Background Removal Toggle */}
-                    <div className="bg-designer-bg/50 rounded-2xl p-5 border border-designer-border">
-                        <label className="text-[10px] font-black text-designer-muted uppercase tracking-[0.2em] mb-4 block">Background Removal</label>
-                        <div
-                            onClick={() => setBgRemoval(!bgRemoval)}
-                            className={`relative w-full h-12 rounded-xl border cursor-pointer transition-all flex items-center px-4 ${bgRemoval ? 'bg-designer-accent border-designer-accent shadow-lg' : 'bg-designer-bg border-designer-border hover:border-designer-muted'}`}
-                        >
-                            <div className="flex-1">
-                                <span className={`text-xs font-bold uppercase tracking-widest ${bgRemoval ? 'text-designer-bg' : 'text-designer-text'}`}>
-                                    {bgRemoval ? 'Enabled' : 'Disabled'}
-                                </span>
-                            </div>
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${bgRemoval ? 'bg-designer-bg text-designer-accent translate-x-0' : 'bg-designer-muted/20 text-designer-muted'}`}>
-                                {bgRemoval ? <Check size={14} strokeWidth={3} /> : <X size={14} />}
-                            </div>
-                        </div>
-                        <p className="text-[9px] text-designer-muted mt-3 font-medium opacity-60">
-                            * Automatically removes backgrounds using AI. Increases processing time.
-                        </p>
-                    </div>
+
 
                     {/* Format Section */}
                     <div className="bg-designer-bg/50 rounded-2xl p-5 border border-designer-border">
@@ -321,16 +274,7 @@ const CollectionDetail = () => {
 
                 {/* Bottom Action */}
                 <div className="p-5 border-t border-designer-border bg-designer-card/50 mt-auto">
-                    <div className="bg-designer-bg rounded-2xl p-5 border border-designer-border mb-4 shadow-inner">
-                        <p className="text-[10px] text-designer-muted font-bold mb-2 uppercase tracking-widest text-center opacity-70">Projected Payload</p>
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-2xl font-black text-designer-text tracking-tighter">{getPayloadSize()}</h3>
-                            <div className="text-right flex flex-col items-end">
-                                <p className="text-xs text-designer-accent font-black uppercase">{selectedPhotos.length} Units</p>
-                                <p className="text-[8px] text-designer-muted font-bold tracking-tighter max-w-[120px] truncate">{getPayloadFilename()}</p>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <button
                         disabled={processing || selectedPhotos.length === 0}

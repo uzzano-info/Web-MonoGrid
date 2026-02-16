@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Download, FolderPlus, Loader2 } from 'lucide-react';
 import { searchPhotos } from '../api/pexels';
 
-const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollection }) => {
+const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onSelectPhoto }) => {
     const [relatedPhotos, setRelatedPhotos] = useState([]);
     const [loadingRelated, setLoadingRelated] = useState(false);
 
@@ -121,8 +121,12 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
                                 ) : (
                                     <div className="grid grid-cols-3 gap-2">
                                         {relatedPhotos.map(p => (
-                                            <div key={p.id} className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative">
-                                                <img src={p.src.tiny} alt="" className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all cursor-pointer group-hover/item:scale-110" />
+                                            <div
+                                                key={p.id}
+                                                onClick={() => onSelectPhoto(p)}
+                                                className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
+                                            >
+                                                <img src={p.src.tiny} alt="" className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
                                             </div>
                                         ))}
                                     </div>
@@ -137,14 +141,6 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
                             >
                                 <Download size={20} />
                                 Download Master
-                            </button>
-
-                            <button
-                                onClick={() => onAddToCollection(photo)}
-                                className="w-full flex items-center justify-center gap-3 border border-designer-border bg-designer-bg/50 text-designer-text py-4 rounded-2xl font-bold hover:bg-designer-card transition-all hover:border-designer-muted active:scale-95"
-                            >
-                                <FolderPlus size={20} />
-                                Archive to Collection
                             </button>
                         </div>
                     </div>
