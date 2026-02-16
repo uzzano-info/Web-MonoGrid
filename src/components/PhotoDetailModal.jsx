@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ExternalLink, Download, FolderPlus, Loader2 } from 'lucide-react';
 import { searchPhotos } from '../api/pexels';
 
-const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onSelectPhoto }) => {
+const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollection, onSelectPhoto }) => {
     const [relatedPhotos, setRelatedPhotos] = useState([]);
     const [loadingRelated, setLoadingRelated] = useState(false);
 
@@ -35,12 +35,14 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onSelectPhoto })
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
+                onClick={onClose}
                 className="fixed inset-0 z-[60] flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 md:p-8"
             >
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0, y: 20 }}
                     animate={{ scale: 1, opacity: 1, y: 0 }}
                     exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                    onClick={(e) => e.stopPropagation()}
                     className="bg-designer-modal border border-designer-border rounded-3xl w-full max-w-6xl h-full max-h-[95vh] overflow-hidden flex flex-col md:flex-row shadow-2xl"
                 >
                     <button
@@ -141,6 +143,14 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onSelectPhoto })
                             >
                                 <Download size={20} />
                                 Download Master
+                            </button>
+
+                            <button
+                                onClick={() => onAddToCollection(photo)}
+                                className="w-full flex items-center justify-center gap-3 border border-designer-border bg-designer-bg/50 text-designer-text py-4 rounded-2xl font-bold hover:bg-designer-card transition-all hover:border-designer-muted active:scale-95"
+                            >
+                                <FolderPlus size={20} />
+                                Archive to Collection
                             </button>
                         </div>
                     </div>
