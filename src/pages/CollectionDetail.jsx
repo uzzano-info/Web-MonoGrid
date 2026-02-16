@@ -11,7 +11,6 @@ const CollectionDetail = () => {
     const [collection, setCollection] = useState(null);
     const [selectedPhotos, setSelectedPhotos] = useState([]);
     const [processing, setProcessing] = useState(false);
-    const [processedPhotos, setProcessedPhotos] = useState([]);
     const scrollRef = useRef(null);
 
     // Batch Config State
@@ -19,8 +18,6 @@ const CollectionDetail = () => {
     const [size, setSize] = useState('Original');
     const [itemsToShow, setItemsToShow] = useState(20);
     const [viewMode, setViewMode] = useState('grid');
-
-    // Legacy state removed: bgRemoval (replaced by action)
 
     useEffect(() => {
         const found = collections.find(c => c.id === id);
@@ -31,9 +28,7 @@ const CollectionDetail = () => {
 
     if (!collection) return <div className="min-h-screen bg-designer-bg flex items-center justify-center text-white">Loading...</div>;
 
-    // Merge collection photos with locally processed photos
-    const allPhotos = [...(collection.photos || []), ...processedPhotos];
-    const displayedPhotos = allPhotos.slice(0, itemsToShow);
+    const displayedPhotos = collection.photos.slice(0, itemsToShow);
 
     const toggleSelect = (photoId) => {
         if (selectedPhotos.includes(photoId)) {
@@ -44,17 +39,17 @@ const CollectionDetail = () => {
     };
 
     const toggleSelectAll = () => {
-        if (selectedPhotos.length === allPhotos.length && allPhotos.length > 0) {
+        if (selectedPhotos.length === collection.photos.length && collection.photos.length > 0) {
             setSelectedPhotos([]);
         } else {
-            setSelectedPhotos(allPhotos.map(p => p.id));
+            setSelectedPhotos(collection.photos.map(p => p.id));
         }
     };
 
     const handleScroll = (e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         if (scrollHeight - scrollTop <= clientHeight + 100) {
-            if (itemsToShow < allPhotos.length) {
+            if (itemsToShow < collection.photos.length) {
                 setItemsToShow(prev => prev + 20);
             }
         }
@@ -66,69 +61,16 @@ const CollectionDetail = () => {
         return `${baseName}-${size}-${format}.zip`.toUpperCase();
     };
 
-    const getPayloadSize = () => {
-        if (selectedPhotos.length === 0) return 'Select Assets';
-        return 'Ready to Export';
-    };
-
-    const handleRemoveBackground = async () => {
-        if (selectedPhotos.length === 0) return;
-        setProcessing(true);
-
-        const photosToProcess = allPhotos.filter(p => selectedPhotos.includes(p.id));
-        const newProcessed = [];
-
-        try {
-            // Dynamic import to avoid top-level issues
-            const { removeBackground } = await import('../utils/imageProcessor');
-
-            // Process sequentially to avoid browser crash on memory
-            for (const photo of photosToProcess) {
-                // Skip if already processed to avoid double processing
-                if (photo.isLocal) continue;
-
-                const blob = await fetch(photo.src.large).then(r => r.blob());
-                const processedBlob = await removeBackground(blob);
-                const processedUrl = URL.createObjectURL(processedBlob);
-
-                const newPhoto = {
-                    ...photo,
-                    id: `${photo.id}-bg-removed-${Date.now()}`,
-                    src: {
-                        original: processedUrl,
-                        large: processedUrl,
-                        large2x: processedUrl,
-                        medium: processedUrl,
-                        small: processedUrl,
-                        tiny: processedUrl,
-                        landscape: processedUrl,
-                        portrait: processedUrl
-                    },
-                    alt: `${photo.alt} (BG Removed)`,
-                    isLocal: true
-                };
-                newProcessed.push(newPhoto);
-            }
-
-            setProcessedPhotos(prev => [...prev, ...newProcessed]);
-        } catch (error) {
-            console.error("BG Removal Error:", error);
-            alert("Failed to process background removal. Check console.");
-        } finally {
-            setProcessing(false);
-        }
-    };
-
     const handleDownload = async () => {
         if (selectedPhotos.length === 0) return;
         setProcessing(true);
-        const photosToDownload = allPhotos.filter(p => selectedPhotos.includes(p.id));
+        const photosToDownload = collection.photos.filter(p => selectedPhotos.includes(p.id));
         const filename = getPayloadFilename().toLowerCase();
 
         await downloadPhotosAsZip(
             photosToDownload,
             filename,
-            { size, format, bgRemoval: false } // No longer passed as a flag
+            { size, format }
         );
 
         setProcessing(false);
@@ -199,7 +141,7 @@ const CollectionDetail = () => {
                                         className={`aspect-square bg-designer-card rounded-xl border p-2 group relative cursor-pointer transition-all duration-300 ${isSelected ? 'border-designer-accent shadow-[0_0_20px_rgba(230,228,224,0.1)] ring-1 ring-designer-accent' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
                                         <div className="w-full h-full rounded-lg overflow-hidden relative bg-[#0f0f0f]">
-                                            <img src={photo.src.large} alt={photo.alt} className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? 'scale-90 opacity-60' : 'group-hover:scale-110'} ${photo.isLocal ? 'object-contain' : 'object-cover'}`} />
+                                            <img src={photo.src.large} alt={photo.alt} className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? 'scale-90 opacity-60' : 'group-hover:scale-110'}`} />
 
                                             <div className={`absolute inset-0 bg-designer-accent/5 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0'}`}></div>
 
@@ -209,13 +151,6 @@ const CollectionDetail = () => {
                                                     {isSelected && <Check size={14} strokeWidth={3} />}
                                                 </div>
                                             </div>
-
-                                            {/* Local Indicator */}
-                                            {photo.isLocal && (
-                                                <div className="absolute top-2 right-2 bg-designer-accent text-designer-bg text-[8px] font-black px-1.5 py-0.5 rounded uppercase">
-                                                    BG Removed
-                                                </div>
-                                            )}
                                         </div>
                                     </div>
                                 );
@@ -236,7 +171,7 @@ const CollectionDetail = () => {
                                         className={`flex items-center gap-4 bg-designer-card p-2 rounded-xl border transition-all cursor-pointer group ${isSelected ? 'border-designer-accent bg-designer-accent/5' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
                                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/20 shrink-0 relative">
-                                            <img src={photo.src.tiny} alt={photo.alt} className={`w-full h-full ${photo.isLocal ? 'object-contain' : 'object-cover'}`} />
+                                            <img src={photo.src.tiny} alt={photo.alt} className="w-full h-full object-cover" />
                                             {isSelected && (
                                                 <div className="absolute inset-0 bg-designer-accent/20 flex items-center justify-center">
                                                     <Check size={16} className="text-designer-bg drop-shadow-md" strokeWidth={3} />
@@ -244,7 +179,7 @@ const CollectionDetail = () => {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-designer-text truncate text-sm">{photo.alt || 'Untitled Asset'} {photo.isLocal && <span className="text-designer-accent text-[10px] uppercase ml-2">(Processed)</span>}</h4>
+                                            <h4 className="font-bold text-designer-text truncate text-sm">{photo.alt || 'Untitled Asset'}</h4>
                                             <p className="text-xs text-designer-muted">by {photo.photographer}</p>
                                         </div>
                                         <div className="px-4 text-[10px] font-mono text-designer-muted">
@@ -280,51 +215,7 @@ const CollectionDetail = () => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
-                    {/* Background Removal Toggle - Image Button Style */}
-                    {/* Background Removal Action */}
-                    <div className="bg-designer-bg/50 rounded-2xl p-5 border border-designer-border">
-                        <label className="text-[10px] font-black text-designer-muted uppercase tracking-[0.2em] mb-4 block">Background Removal</label>
-                        <button
-                            onClick={handleRemoveBackground}
-                            disabled={processing || selectedPhotos.length === 0}
-                            className={`relative w-full aspect-video rounded-xl border transition-all overflow-hidden group border-designer-border hover:border-designer-accent hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                            {/* Visual Representation */}
-                            <div className="absolute inset-0 flex">
-                                <div className="w-1/2 h-full bg-designer-muted/20 flex items-center justify-center border-r border-designer-border/10">
-                                    <ImageIcon size={24} className="opacity-50" />
-                                </div>
-                                <div className="w-1/2 h-full flex items-center justify-center bg-designer-card relative overflow-hidden">
-                                    <div className="grid grid-cols-2 gap-0.5 opacity-50 absolute inset-0 rotate-12 scale-150">
-                                        {[...Array(20)].map((_, i) => (
-                                            <div key={i} className="w-4 h-4 bg-designer-muted/10 rounded-[1px]"></div>
-                                        ))}
-                                    </div>
-                                    <CheckSquare size={24} className="opacity-50 relative z-10 text-designer-accent" />
-                                </div>
-                            </div>
 
-                            {/* Status Overlay */}
-                            <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between">
-                                <span className="text-[10px] font-bold uppercase tracking-widest text-designer-text">
-                                    Process Removal
-                                </span>
-                                <div className="w-5 h-5 rounded-full bg-white/10 text-white/50 flex items-center justify-center group-hover:bg-designer-accent group-hover:text-designer-bg transition-colors">
-                                    <ToggleRight size={14} />
-                                </div>
-                            </div>
-
-                            {/* Central Action Icon */}
-                            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                <div className="bg-designer-bg/90 backdrop-blur px-3 py-1.5 rounded-full border border-designer-accent">
-                                    <span className="text-[10px] font-bold text-designer-accent uppercase">Run AI</span>
-                                </div>
-                            </div>
-                        </button>
-                        <p className="text-[9px] text-designer-muted mt-3 font-medium opacity-60">
-                            * Creates a duplicate asset with background removed using AI.
-                        </p>
-                    </div>
 
 
 
@@ -384,16 +275,7 @@ const CollectionDetail = () => {
 
                 {/* Bottom Action */}
                 <div className="p-5 border-t border-designer-border bg-designer-card/50 mt-auto">
-                    <div className="bg-designer-bg rounded-2xl p-5 border border-designer-border mb-4 shadow-inner">
-                        <p className="text-[10px] text-designer-muted font-bold mb-2 uppercase tracking-widest text-center opacity-70">Download Summary</p>
-                        <div className="flex justify-between items-center">
-                            <h3 className="text-xl font-black text-designer-text tracking-tighter">Ready to Export</h3>
-                            <div className="text-right flex flex-col items-end">
-                                <p className="text-xs text-designer-accent font-black uppercase">{selectedPhotos.length} Units</p>
-                                <p className="text-[8px] text-designer-muted font-bold tracking-tighter max-w-[120px] truncate">{getPayloadFilename()}</p>
-                            </div>
-                        </div>
-                    </div>
+
 
                     <button
                         disabled={processing || selectedPhotos.length === 0}

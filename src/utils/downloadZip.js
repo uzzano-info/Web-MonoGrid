@@ -2,7 +2,7 @@ import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { getImageUrlBySize, convertImageFormat, removeBackground } from './imageProcessor';
 
-export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.zip', options = { size: 'Original', format: 'JPG', bgRemoval: false }) => {
+export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.zip', options = { size: 'Original', format: 'JPG' }) => {
     const zip = new JSZip();
     const folder = zip.folder('photos');
 
@@ -21,17 +21,12 @@ export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.
             // 2. Fetch Blob
             let blob = await fetchBlob(targetUrl);
 
-            // 3. Background Removal (Simulation)
-            if (options.bgRemoval) {
-                blob = await removeBackground(blob);
-            }
-
-            // 4. Convert Format if needed
+            // 3. Convert Format if needed
             const convertedBlob = await convertImageFormat(blob, options.format);
 
-            // 5. Determine extension
+            // 4. Determine extension
             const extension = options.format.toLowerCase();
-            const name = `${photo.id}-${photo.photographer.replace(/\s+/g, '-').toLowerCase()}${options.bgRemoval ? '_bg_removed' : ''}.${extension}`;
+            const name = `${photo.id}-${photo.photographer.replace(/\s+/g, '-').toLowerCase()}.${extension}`;
 
             folder.file(name, convertedBlob);
         } catch (error) {
