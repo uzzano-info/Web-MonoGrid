@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check, X } from 'lucide-react';
+import { ArrowLeft, Download, Grid, List, ToggleRight, FileImage, Image as ImageIcon, Check, FolderPlus } from 'lucide-react';
 import useCollectionStore from '../store/useCollectionStore';
 import { downloadPhotosAsZip } from '../utils/downloadZip';
+import CollectionModal from '../components/CollectionModal';
+import PhotoDetailModal from '../components/PhotoDetailModal';
 
 const CollectionDetail = () => {
     const { id } = useParams();
@@ -18,6 +20,11 @@ const CollectionDetail = () => {
     const [size, setSize] = useState('Original');
     const [itemsToShow, setItemsToShow] = useState(20);
     const [viewMode, setViewMode] = useState('grid');
+
+    // Modal State
+    const [isCollectionModalOpen, setIsCollectionModalOpen] = useState(false);
+    const [photosToAdd, setPhotosToAdd] = useState([]);
+    const [selectedPhotoForDetail, setSelectedPhotoForDetail] = useState(null);
 
     useEffect(() => {
         const found = collections.find(c => c.id === id);
@@ -74,6 +81,29 @@ const CollectionDetail = () => {
         );
 
         setProcessing(false);
+    };
+
+    const openCollectionModal = (photos) => {
+        setPhotosToAdd(Array.isArray(photos) ? photos : [photos]);
+        setIsCollectionModalOpen(true);
+    };
+
+    const handlePhotoDownload = async (photo) => {
+        try {
+            const response = await fetch(photo.src.original);
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `pexels-${photo.id}-${photo.photographer.replace(/\s+/g, '-').toLowerCase()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error('Download failed:', error);
+            window.open(photo.src.original, '_blank');
+        }
     };
 
     return (
@@ -140,7 +170,10 @@ const CollectionDetail = () => {
                                         onClick={() => toggleSelect(photo.id)}
                                         className={`aspect-square bg-designer-card rounded-xl border p-2 group relative cursor-pointer transition-all duration-300 ${isSelected ? 'border-designer-accent shadow-[0_0_20px_rgba(230,228,224,0.1)] ring-1 ring-designer-accent' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
-                                        <div className="w-full h-full rounded-lg overflow-hidden relative bg-[#0f0f0f]">
+                                        <div className="w-full h-full rounded-lg overflow-hidden relative bg-[#0f0f0f]" onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPhotoForDetail(photo);
+                                        }}>
                                             <img src={photo.src.large} alt={photo.alt} className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? 'scale-90 opacity-60' : 'group-hover:scale-110'}`} />
 
                                             <div className={`absolute inset-0 bg-designer-accent/5 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0'}`}></div>
@@ -170,7 +203,10 @@ const CollectionDetail = () => {
                                         onClick={() => toggleSelect(photo.id)}
                                         className={`flex items-center gap-4 bg-designer-card p-2 rounded-xl border transition-all cursor-pointer group ${isSelected ? 'border-designer-accent bg-designer-accent/5' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
-                                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/20 shrink-0 relative">
+                                        <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/20 shrink-0 relative" onClick={(e) => {
+                                            e.stopPropagation();
+                                            setSelectedPhotoForDetail(photo);
+                                        }}>
                                             <img src={photo.src.tiny} alt={photo.alt} className="w-full h-full object-cover" />
                                             {isSelected && (
                                                 <div className="absolute inset-0 bg-designer-accent/20 flex items-center justify-center">
@@ -297,6 +333,20 @@ const CollectionDetail = () => {
                     <p className="text-center text-[10px] text-designer-muted mt-4 cursor-pointer hover:text-designer-text font-black uppercase tracking-[0.2em] transition-colors" onClick={() => navigate('/')}>Return to Hub</p>
                 </div>
             </div>
+
+            <CollectionModal
+                isOpen={isCollectionModalOpen}
+                onClose={() => setIsCollectionModalOpen(false)}
+                photosToAdd={photosToAdd}
+            />
+
+            <PhotoDetailModal
+                photo={selectedPhotoForDetail}
+                isOpen={!!selectedPhotoForDetail}
+                onClose={() => setSelectedPhotoForDetail(null)}
+                onDownload={handlePhotoDownload}
+                onAddToCollection={(p) => openCollectionModal([p])}
+            />
         </div >
     );
 };

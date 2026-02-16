@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { getImageUrlBySize, convertImageFormat, removeBackground } from './imageProcessor';
+import { getImageUrlBySize, convertImageFormat } from './imageProcessor';
 
 export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.zip', options = { size: 'Original', format: 'JPG' }) => {
     const zip = new JSZip();
