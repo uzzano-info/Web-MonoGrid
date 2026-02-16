@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
-  base: process.env.GITHUB_ACTIONS === 'true' ? '/Web-MonoGrid/' : '/',
+  base: (process.env.VERCEL === '1' || process.env.VERCEL === 'true') ? '/' : (process.env.GITHUB_ACTIONS === 'true' ? '/Web-MonoGrid/' : '/'),
   plugins: [
     react(),
     VitePWA({
