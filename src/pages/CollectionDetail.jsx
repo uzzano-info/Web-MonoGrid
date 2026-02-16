@@ -244,25 +244,50 @@ const CollectionDetail = () => {
                 </div>
 
                 <div className="flex-1 overflow-y-auto p-5 space-y-6 custom-scrollbar">
-                    {/* Background Removal Toggle */}
+                    {/* Background Removal Toggle - Image Button Style */}
                     <div className="bg-designer-bg/50 rounded-2xl p-5 border border-designer-border">
                         <label className="text-[10px] font-black text-designer-muted uppercase tracking-[0.2em] mb-4 block">Background Removal</label>
-                        <div
+                        <button
                             onClick={() => setBgRemoval(!bgRemoval)}
-                            className={`relative w-full h-12 rounded-xl border cursor-pointer transition-all flex items-center px-4 ${bgRemoval ? 'bg-designer-accent border-designer-accent shadow-lg' : 'bg-designer-bg border-designer-border hover:border-designer-muted'}`}
+                            className={`relative w-full aspect-video rounded-xl border transition-all overflow-hidden group ${bgRemoval ? 'border-designer-accent ring-2 ring-designer-accent ring-offset-2 ring-offset-designer-bg' : 'border-designer-border hover:border-designer-muted'}`}
                         >
-                            <div className="flex-1">
-                                <span className={`text-xs font-bold uppercase tracking-widest ${bgRemoval ? 'text-designer-bg' : 'text-designer-text'}`}>
-                                    {bgRemoval ? 'Enabled' : 'Disabled'}
+                            {/* Visual Representation */}
+                            <div className="absolute inset-0 flex">
+                                <div className="w-1/2 h-full bg-designer-muted/20 flex items-center justify-center border-r border-designer-border/10">
+                                    <ImageIcon size={24} className="opacity-50" />
+                                </div>
+                                <div className={`w-1/2 h-full flex items-center justify-center transition-colors ${bgRemoval ? 'bg-designer-card' : 'bg-designer-bg'}`}>
+                                    {bgRemoval ? (
+                                        <div className="grid grid-cols-2 gap-0.5 opacity-50">
+                                            {[...Array(9)].map((_, i) => (
+                                                <div key={i} className="w-2 h-2 bg-designer-muted/30 rounded-[1px]"></div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <ImageIcon size={24} className="opacity-50" />
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Status Overlay */}
+                            <div className="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/80 to-transparent flex items-center justify-between">
+                                <span className={`text-[10px] font-bold uppercase tracking-widest ${bgRemoval ? 'text-designer-accent' : 'text-designer-muted'}`}>
+                                    {bgRemoval ? 'Active' : 'Inactive'}
                                 </span>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center ${bgRemoval ? 'bg-designer-accent text-designer-bg' : 'bg-white/10 text-white/50'}`}>
+                                    {bgRemoval ? <Check size={12} strokeWidth={3} /> : <X size={12} />}
+                                </div>
                             </div>
-                            <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all ${bgRemoval ? 'bg-designer-bg text-designer-accent translate-x-0' : 'bg-designer-muted/20 text-designer-muted'}`}>
-                                {bgRemoval ? <Check size={14} strokeWidth={3} /> : <X size={14} />}
-                            </div>
-                        </div>
-                        <p className="text-[9px] text-designer-muted mt-3 font-medium opacity-60">
-                            * Automatically removes backgrounds using AI. Increases processing time.
-                        </p>
+
+                            {/* Central Action Icon (Optional) */}
+                            {!bgRemoval && (
+                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <div className="bg-designer-bg/80 backdrop-blur px-3 py-1.5 rounded-full border border-white/10">
+                                        <span className="text-[10px] font-bold text-designer-text uppercase">Enable</span>
+                                    </div>
+                                </div>
+                            )}
+                        </button>
                     </div>
 
                     {/* Format Section */}
@@ -322,7 +347,7 @@ const CollectionDetail = () => {
                 {/* Bottom Action */}
                 <div className="p-5 border-t border-designer-border bg-designer-card/50 mt-auto">
                     <div className="bg-designer-bg rounded-2xl p-5 border border-designer-border mb-4 shadow-inner">
-                        <p className="text-[10px] text-designer-muted font-bold mb-2 uppercase tracking-widest text-center opacity-70">Projected Payload</p>
+                        <p className="text-[10px] text-designer-muted font-bold mb-2 uppercase tracking-widest text-center opacity-70">Est. Payload (Approx)</p>
                         <div className="flex justify-between items-center">
                             <h3 className="text-2xl font-black text-designer-text tracking-tighter">{getPayloadSize()}</h3>
                             <div className="text-right flex flex-col items-end">
