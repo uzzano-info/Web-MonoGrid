@@ -1,6 +1,6 @@
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { getImageUrlBySize, convertImageFormat, removeBackgroundMock } from './imageProcessor';
+import { getImageUrlBySize, convertImageFormat, removeBackground } from './imageProcessor';
 
 export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.zip', options = { size: 'Original', format: 'JPG', bgRemoval: false }) => {
     const zip = new JSZip();
@@ -23,7 +23,7 @@ export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.
 
             // 3. Background Removal (Simulation)
             if (options.bgRemoval) {
-                blob = await removeBackgroundMock(blob);
+                blob = await removeBackground(blob);
             }
 
             // 4. Convert Format if needed
