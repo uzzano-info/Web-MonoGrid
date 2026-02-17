@@ -183,6 +183,13 @@ function Home() {
                         </button>
                         <div className="h-4 w-px bg-designer-border"></div>
                         <button
+                            onClick={() => navigate('/explore')}
+                            className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-2"
+                        >
+                            <span>Explore</span>
+                        </button>
+                        <div className="h-4 w-px bg-designer-border"></div>
+                        <button
                             onClick={() => openCollectionModal([])}
                             className="bg-designer-accent text-designer-bg px-4 py-2 rounded-lg text-sm font-bold hover:bg-designer-accent-hover transition-all flex items-center gap-2 shadow-lg active:scale-95"
                         >

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check, X } from 'lucide-react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
+import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check, X, Film } from 'lucide-react';
 import useCollectionStore from '../store/useCollectionStore';
 import { downloadPhotosAsZip } from '../utils/downloadZip';
 import { Helmet } from 'react-helmet-async';
@@ -8,11 +8,15 @@ import { Helmet } from 'react-helmet-async';
 const CollectionDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { collections } = useCollectionStore();
-    // Derived state instead of useEffect sync
+    const location = useLocation();
+    const queryParams = new URLSearchParams(location.search);
+    const type = queryParams.get('type') || 'photos'; // 'photos' | 'videos'
+
+    const { photoCollections, videoCollections } = useCollectionStore();
+    const collections = type === 'videos' ? videoCollections : photoCollections;
     const collection = collections.find(c => c.id === id);
 
-    const [selectedPhotos, setSelectedPhotos] = useState([]);
+    const [selectedItems, setSelectedItems] = useState([]);
     const [processing, setProcessing] = useState(false);
     const scrollRef = useRef(null);
 
@@ -23,37 +27,32 @@ const CollectionDetail = () => {
     const [itemsToShow, setItemsToShow] = useState(20);
     const [viewMode, setViewMode] = useState('grid');
 
-    useEffect(() => {
-        if (!collection && collections.length > 0) {
-            // Handle 404 or redirect if needed, but for now just logging or leaving as is
-            // If collection not found but collections exist, maybe invalid ID
-        }
-    }, [id, collection, collections]);
+    const isVideoMode = type === 'videos';
 
-    if (!collection) return <div className="min-h-screen bg-designer-bg flex items-center justify-center text-white">Loading...</div>;
+    if (!collection) return <div className="min-h-screen bg-designer-bg flex items-center justify-center text-white">Archive not found or indexing...</div>;
 
-    const displayedPhotos = collection.photos.slice(0, itemsToShow);
+    const displayedItems = collection.items.slice(0, itemsToShow);
 
-    const toggleSelect = (photoId) => {
-        if (selectedPhotos.includes(photoId)) {
-            setSelectedPhotos(selectedPhotos.filter(id => id !== photoId));
+    const toggleSelect = (itemId) => {
+        if (selectedItems.includes(itemId)) {
+            setSelectedItems(selectedItems.filter(id => id !== itemId));
         } else {
-            setSelectedPhotos([...selectedPhotos, photoId]);
+            setSelectedItems([...selectedItems, itemId]);
         }
     };
 
     const toggleSelectAll = () => {
-        if (selectedPhotos.length === collection.photos.length && collection.photos.length > 0) {
-            setSelectedPhotos([]);
+        if (selectedItems.length === collection.items.length && collection.items.length > 0) {
+            setSelectedItems([]);
         } else {
-            setSelectedPhotos(collection.photos.map(p => p.id));
+            setSelectedItems(collection.items.map(p => p.id));
         }
     };
 
     const handleScroll = (e) => {
         const { scrollTop, scrollHeight, clientHeight } = e.target;
         if (scrollHeight - scrollTop <= clientHeight + 100) {
-            if (itemsToShow < collection.photos.length) {
+            if (itemsToShow < collection.items.length) {
                 setItemsToShow(prev => prev + 20);
             }
         }
@@ -66,13 +65,13 @@ const CollectionDetail = () => {
     };
 
     const handleDownload = async () => {
-        if (selectedPhotos.length === 0) return;
+        if (selectedItems.length === 0) return;
         setProcessing(true);
-        const photosToDownload = collection.photos.filter(p => selectedPhotos.includes(p.id));
+        const itemsToDownload = collection.items.filter(p => selectedItems.includes(p.id));
         const filename = getPayloadFilename().toLowerCase();
 
         await downloadPhotosAsZip(
-            photosToDownload,
+            itemsToDownload,
             filename,
             { size, format }
         );
@@ -84,7 +83,7 @@ const CollectionDetail = () => {
         <div className="min-h-screen bg-designer-bg text-designer-text font-sans flex flex-col md:flex-row overflow-hidden fixed inset-0">
             <Helmet>
                 <title>{collection.name} | MonoGrid Collection</title>
-                <meta name="description" content={`View and batch download photos from the "${collection.name}" collection on MonoGrid.`} />
+                <meta name="description" content={`View and batch download ${type} from the "${collection.name}" collection on MonoGrid.`} />
             </Helmet>
             {/* Main Content Area */}
             <main className="flex-1 flex flex-col h-full relative z-10">
@@ -95,8 +94,8 @@ const CollectionDetail = () => {
                             <ArrowLeft size={20} />
                         </button>
                         <h1 className="text-xl font-bold text-designer-text tracking-tight">{collection.name}</h1>
-                        <span className="text-[10px] font-mono bg-designer-card text-designer-accent px-2 py-0.5 rounded border border-designer-border">
-                            BATCH #{id.slice(-4).toUpperCase()} // PROCESSING
+                        <span className="text-[10px] font-mono bg-designer-card text-designer-accent px-2 py-0.5 rounded border border-designer-border uppercase">
+                            {type} BATCH #{id.slice(-4).toUpperCase()}
                         </span>
                     </div>
                 </header>
@@ -107,11 +106,11 @@ const CollectionDetail = () => {
                         <label className="flex items-center gap-2 cursor-pointer text-designer-muted hover:text-designer-text transition-colors select-none">
                             <input
                                 type="checkbox"
-                                checked={selectedPhotos.length === collection.photos.length && collection.photos.length > 0}
+                                checked={selectedItems.length === collection.items.length && collection.items.length > 0}
                                 onChange={toggleSelectAll}
                                 className="rounded border-designer-border bg-transparent text-designer-accent focus:ring-offset-designer-bg focus:ring-designer-accent"
                             />
-                            Select All ({collection.photos.length})
+                            Select All ({collection.items.length})
                         </label>
                     </div>
                     <div className="flex items-center gap-2">
@@ -140,16 +139,26 @@ const CollectionDetail = () => {
                     {viewMode === 'grid' ? (
                         /* Grid View */
                         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-20">
-                            {displayedPhotos.map(photo => {
-                                const isSelected = selectedPhotos.includes(photo.id);
+                            {displayedItems.map(item => {
+                                const isSelected = selectedItems.includes(item.id);
                                 return (
                                     <div
-                                        key={photo.id}
-                                        onClick={() => toggleSelect(photo.id)}
+                                        key={item.id}
+                                        onClick={() => toggleSelect(item.id)}
                                         className={`aspect-square bg-designer-card rounded-xl border p-2 group relative cursor-pointer transition-all duration-300 ${isSelected ? 'border-designer-accent shadow-[0_0_20px_rgba(230,228,224,0.1)] ring-1 ring-designer-accent' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
                                         <div className="w-full h-full rounded-lg overflow-hidden relative bg-[#0f0f0f]">
-                                            <img src={photo.src.large} alt={photo.alt} className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? 'scale-90 opacity-60' : 'group-hover:scale-110'}`} />
+                                            <img
+                                                src={isVideoMode ? item.image : item.src.large}
+                                                alt={item.alt}
+                                                className={`w-full h-full object-cover transition-transform duration-700 ${isSelected ? 'scale-90 opacity-60' : 'group-hover:scale-110'}`}
+                                            />
+
+                                            {isVideoMode && (
+                                                <div className="absolute top-2 right-2 p-1.5 bg-black/50 backdrop-blur-md rounded-lg text-white/70">
+                                                    <Film size={14} />
+                                                </div>
+                                            )}
 
                                             <div className={`absolute inset-0 bg-designer-accent/5 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0'}`}></div>
 
@@ -163,23 +172,23 @@ const CollectionDetail = () => {
                                     </div>
                                 );
                             })}
-                            {displayedPhotos.length < 10 && Array.from({ length: 10 - displayedPhotos.length }).map((_, i) => (
+                            {displayedItems.length < 10 && Array.from({ length: 10 - displayedItems.length }).map((_, i) => (
                                 <div key={`empty-${i}`} className="aspect-square bg-designer-card/20 rounded-xl border border-designer-border opacity-20"></div>
                             ))}
                         </div>
                     ) : (
                         /* List View */
                         <div className="flex flex-col gap-2 pb-20">
-                            {displayedPhotos.map(photo => {
-                                const isSelected = selectedPhotos.includes(photo.id);
+                            {displayedItems.map(item => {
+                                const isSelected = selectedItems.includes(item.id);
                                 return (
                                     <div
-                                        key={photo.id}
-                                        onClick={() => toggleSelect(photo.id)}
+                                        key={item.id}
+                                        onClick={() => toggleSelect(item.id)}
                                         className={`flex items-center gap-4 bg-designer-card p-2 rounded-xl border transition-all cursor-pointer group ${isSelected ? 'border-designer-accent bg-designer-accent/5' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
                                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/20 shrink-0 relative">
-                                            <img src={photo.src.tiny} alt={photo.alt} className="w-full h-full object-cover" />
+                                            <img src={isVideoMode ? item.image : item.src.tiny} alt={item.alt} className="w-full h-full object-cover" />
                                             {isSelected && (
                                                 <div className="absolute inset-0 bg-designer-accent/20 flex items-center justify-center">
                                                     <Check size={16} className="text-designer-bg drop-shadow-md" strokeWidth={3} />
@@ -187,11 +196,11 @@ const CollectionDetail = () => {
                                             )}
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="font-bold text-designer-text truncate text-sm">{photo.alt || 'Untitled Asset'}</h4>
-                                            <p className="text-xs text-designer-muted">by {photo.photographer}</p>
+                                            <h4 className="font-bold text-designer-text truncate text-sm">{item.alt || 'Untitled Asset'}</h4>
+                                            <p className="text-xs text-designer-muted">by {item.photographer || item.user?.name}</p>
                                         </div>
                                         <div className="px-4 text-[10px] font-mono text-designer-muted">
-                                            {photo.width} x {photo.height}
+                                            {isVideoMode ? `${item.duration}s` : `${item.width} x ${item.height}`}
                                         </div>
                                     </div>
                                 );
@@ -199,7 +208,7 @@ const CollectionDetail = () => {
                         </div>
                     )}
 
-                    {itemsToShow < collection.photos.length && (
+                    {itemsToShow < collection.items.length && (
                         <div className="text-center py-10 text-designer-muted text-[10px] font-bold uppercase tracking-[0.3em] animate-pulse">
                             Indexing assets // scanning archive...
                         </div>
@@ -208,8 +217,8 @@ const CollectionDetail = () => {
 
                 {/* Footer Status */}
                 <div className="px-6 py-2 border-t border-designer-border text-[10px] text-designer-muted font-bold uppercase tracking-widest flex justify-between shrink-0 bg-designer-bg absolute bottom-0 left-0 right-0 z-20">
-                    <span>System Status: Online // Mode: Minimalist</span>
-                    <span>Rendered: {displayedPhotos.length} / Active: {selectedPhotos.length} / Global: {collection.photos.length}</span>
+                    <span>System Status: Online // Mode: {type.toUpperCase()}</span>
+                    <span>Rendered: {displayedItems.length} / Active: {selectedItems.length} / Global: {collection.items.length}</span>
                 </div>
             </main>
 
@@ -236,11 +245,11 @@ const CollectionDetail = () => {
                         </div>
 
                         <div className="grid grid-cols-3 gap-2">
-                            {['JPG', 'PNG', 'WEBP'].map(f => (
+                            {(isVideoMode ? ['MP4'] : ['JPG', 'PNG', 'WEBP']).map(f => (
                                 <button
                                     key={f}
                                     onClick={() => setFormat(f)}
-                                    className={`text-[10px] font-black py-2.5 rounded-xl border transition-all uppercase tracking-widest ${format === f ? 'bg-designer-accent text-designer-bg border-designer-accent shadow-lg' : 'bg-transparent text-designer-muted border-designer-border hover:border-designer-muted hover:text-designer-text'}`}
+                                    className={`text-[10px] font-black py-2.5 rounded-xl border transition-all uppercase tracking-widest ${format === f || (isVideoMode && f === 'MP4') ? 'bg-designer-accent text-designer-bg border-designer-accent shadow-lg' : 'bg-transparent text-designer-muted border-designer-border hover:border-designer-muted hover:text-designer-text'}`}
                                 >
                                     {f}
                                 </button>
@@ -259,12 +268,15 @@ const CollectionDetail = () => {
                         </div>
 
                         <div className="grid grid-cols-2 gap-2">
-                            {[
+                            {(isVideoMode ? [
+                                { id: 'Original', label: 'Original', sub: 'Highest' },
+                                { id: 'HD', label: 'HD', sub: '1080p' },
+                            ] : [
                                 { id: 'Original', label: 'Original', sub: '>2k px' },
                                 { id: 'Large', label: 'Large', sub: '1k-2k px' },
                                 { id: 'Medium', label: 'Med', sub: '0.5k-1k px' },
                                 { id: 'Small', label: 'Small', sub: '<0.5k px' },
-                            ].map((opt) => (
+                            ]).map((opt) => (
                                 <button
                                     key={opt.id}
                                     onClick={() => setSize(opt.id)}
@@ -284,7 +296,7 @@ const CollectionDetail = () => {
 
 
                     <button
-                        disabled={processing || selectedPhotos.length === 0}
+                        disabled={processing || selectedItems.length === 0}
                         onClick={handleDownload}
                         className="w-full bg-designer-accent hover:bg-designer-accent-hover text-designer-bg font-black py-4 rounded-2xl shadow-xl flex items-center justify-center gap-3 transition-all disabled:opacity-30 disabled:grayscale disabled:cursor-not-allowed group active:scale-95 uppercase text-xs tracking-[0.2em]"
                     >

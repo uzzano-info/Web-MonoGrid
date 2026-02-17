@@ -1,7 +1,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './pages/Home';
 import CollectionDetail from './pages/CollectionDetail';
-
+import Explore from './pages/Explore';
+import ExploreDetail from './pages/ExploreDetail';
 import Community from './pages/Community';
 
 import { HelmetProvider } from 'react-helmet-async';
@@ -13,6 +14,8 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/collections/:id" element={<CollectionDetail />} />
+          <Route path="/explore" element={<Explore />} />
+          <Route path="/explore/:id" element={<ExploreDetail />} />
           <Route path="/community" element={<Community />} />
         </Routes>
       </Router>

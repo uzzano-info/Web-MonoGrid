@@ -129,3 +129,30 @@ export const getRelatedVideos = async (video, perPage = 15) => {
         return { artist: [], visual: [] };
     }
 };
+
+/**
+ * Featured Collections Explorer (Phase 24/26)
+ */
+export const getFeaturedCollections = async (perPage = 20, page = 1) => {
+    try {
+        const response = await client.get('/collections/featured', {
+            params: { per_page: perPage, page }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching featured collections:', error);
+        throw error;
+    }
+};
+
+export const getCollectionMedia = async (id, perPage = 30, page = 1) => {
+    try {
+        const response = await client.get(`/collections/${id}`, {
+            params: { per_page: perPage, page }
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching collection media:', error);
+        throw error;
+    }
+};
