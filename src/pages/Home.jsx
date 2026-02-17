@@ -123,7 +123,14 @@ function Home() {
     };
 
     return (
-        <div className="min-h-screen bg-designer-bg text-designer-text font-sans pb-32">
+        <div className="min-h-screen bg-designer-bg text-designer-text selection:bg-designer-accent selection:text-designer-bg">
+            <Helmet>
+                <title>MonoGrid | Developer Asset Hub</title>
+                <meta name="description" content="A minimalist, high-performance asset discovery platform for developers and designers. Discover, collection, and download millions of professional photos." />
+                <meta property="og:title" content="MonoGrid | Developer Asset Hub" />
+                <meta property="og:description" content="A minimalist, high-performance asset discovery platform for developers and designers." />
+            </Helmet>
+
             <header className="fixed top-0 left-0 right-0 z-[50] bg-designer-bg/80 backdrop-blur-md border-b border-designer-border px-8 py-3 translate-z-0">
                 <div className="max-w-7xl mx-auto flex justify-between items-center text-sm md:text-base">
                     <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>

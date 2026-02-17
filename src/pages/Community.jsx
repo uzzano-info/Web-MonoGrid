@@ -3,6 +3,7 @@ import { ArrowLeft, MessageSquare, ThumbsUp, Send, Coffee, MessageCircle, Heart 
 import { useNavigate } from 'react-router-dom';
 import useCommunityStore from '../store/useCommunityStore';
 import { AnimatePresence } from 'framer-motion';
+import { Helmet } from 'react-helmet-async';
 
 const Community = () => {
     const navigate = useNavigate();
@@ -24,7 +25,11 @@ const Community = () => {
     };
 
     return (
-        <div className="min-h-screen bg-designer-bg text-designer-text font-sans pb-20">
+        <div className="min-h-screen bg-designer-bg text-designer-text selection:bg-designer-accent selection:text-designer-bg flex flex-col">
+            <Helmet>
+                <title>Community Hub | MonoGrid</title>
+                <meta name="description" content="Join the MonoGrid community. Share feedback, request features, and support creator." />
+            </Helmet>
             {/* Header */}
             <header className="fixed top-0 left-0 right-0 z-[50] bg-designer-bg/80 backdrop-blur-md border-b border-designer-border px-6 py-4">
                 <div className="max-w-4xl mx-auto flex items-center gap-4">

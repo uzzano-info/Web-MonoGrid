@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check, X } from 'lucide-react';
 import useCollectionStore from '../store/useCollectionStore';
 import { downloadPhotosAsZip } from '../utils/downloadZip';
+import { Helmet } from 'react-helmet-async';
 
 const CollectionDetail = () => {
     const { id } = useParams();
@@ -81,8 +82,12 @@ const CollectionDetail = () => {
 
     return (
         <div className="min-h-screen bg-designer-bg text-designer-text font-sans flex flex-col md:flex-row overflow-hidden fixed inset-0">
+            <Helmet>
+                <title>{collection.name} | MonoGrid Collection</title>
+                <meta name="description" content={`View and batch download photos from the "${collection.name}" collection on MonoGrid.`} />
+            </Helmet>
             {/* Main Content Area */}
-            <div className="flex-1 flex flex-col h-full relative z-10">
+            <main className="flex-1 flex flex-col h-full relative z-10">
                 {/* Header */}
                 <header className="bg-designer-bg border-b border-designer-border px-6 py-4 flex items-center justify-between shrink-0 h-16">
                     <div className="flex items-center gap-4">
@@ -206,7 +211,7 @@ const CollectionDetail = () => {
                     <span>System Status: Online // Mode: Minimalist</span>
                     <span>Rendered: {displayedPhotos.length} / Active: {selectedPhotos.length} / Global: {collection.photos.length}</span>
                 </div>
-            </div>
+            </main>
 
             {/* Right Sidebar (Batch Configuration) */}
             <div className="w-[320px] bg-designer-card border-l border-designer-border h-full shrink-0 flex flex-col shadow-2xl relative z-20">

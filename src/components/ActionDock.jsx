@@ -1,12 +1,14 @@
 import React from 'react';
 import { Download, X, FolderPlus } from 'lucide-react';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
+
+const MotionDiv = motion.div;
 
 const ActionDock = ({ selectedCount, onClear, onDownload, processing, onAddToCollection }) => {
     return (
         <AnimatePresence>
             {selectedCount > 0 && (
-                <motion.div
+                <MotionDiv
                     initial={{ y: 100, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 100, opacity: 0 }}
@@ -58,7 +60,7 @@ const ActionDock = ({ selectedCount, onClear, onDownload, processing, onAddToCol
                             </button>
                         </div>
                     </div>
-                </motion.div>
+                </MotionDiv>
             )}
         </AnimatePresence>
     );
