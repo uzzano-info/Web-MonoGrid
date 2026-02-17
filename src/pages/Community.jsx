@@ -40,7 +40,7 @@ const Community = () => {
                 {/* 1. Support / Coffee Chat Section */}
                 <section className="grid md:grid-cols-2 gap-6">
                     <div className="bg-designer-card border border-designer-border rounded-2xl p-6 flex flex-col items-center text-center hover:border-designer-accent/30 transition-all shadow-lg group">
-                        <div className="w-16 h-16 rounded-full bg-[#FFDD00] text-amber-900 flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(255,221,0,0.3)] group-hover:scale-110 transition-transform">
+                        <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform border border-designer-border">
                             <Coffee size={32} strokeWidth={2.5} />
                         </div>
                         <h2 className="text-lg font-bold text-designer-text mb-2">Buy me a Coffee</h2>
@@ -49,7 +49,7 @@ const Community = () => {
                             href="https://buymeacoffee.com/uzzano"
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full py-3 bg-[#FFDD00] hover:bg-[#ffe44d] text-amber-900 font-bold rounded-xl transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-black hover:bg-[#1a1a1a] text-white font-bold rounded-xl transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 border border-designer-border"
                         >
                             <Heart size={18} fill="currentColor" />
                             Support Creator
@@ -57,8 +57,8 @@ const Community = () => {
                     </div>
 
                     <div className="bg-designer-card border border-designer-border rounded-2xl p-6 flex flex-col items-center text-center hover:border-designer-accent/30 transition-all shadow-lg group">
-                        <div className="w-16 h-16 rounded-full bg-[#FEE500] text-[#191919] flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(254,229,0,0.3)] group-hover:scale-110 transition-transform">
-                            <MessageCircle size={32} strokeWidth={2.5} />
+                        <div className="w-16 h-16 rounded-full bg-black text-white flex items-center justify-center mb-4 shadow-[0_0_20px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform border border-designer-border">
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
                         </div>
                         <h2 className="text-lg font-bold text-designer-text mb-2">Connect on X</h2>
                         <p className="text-sm text-designer-muted mb-6 px-4">Have a feature request or just want to chat? Connect directly via X (Twitter).</p>
@@ -66,7 +66,7 @@ const Community = () => {
                             href="https://x.com/uzzano_dev"
                             target="_blank"
                             rel="noreferrer"
-                            className="w-full py-3 bg-[#000000] hover:bg-[#333333] text-white font-bold rounded-xl transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
+                            className="w-full py-3 bg-black hover:bg-[#1a1a1a] text-white font-bold rounded-xl transition-all active:scale-95 shadow-md flex items-center justify-center gap-2 border border-designer-border"
                         >
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" /></svg>
                             Connect on X
