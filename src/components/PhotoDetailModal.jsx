@@ -8,8 +8,10 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
     const [relatedVisual, setRelatedVisual] = useState([]);
     const [loadingRelated, setLoadingRelated] = useState(false);
 
+    const isVideo = photo?.video_files; // Check if asset is a video
+
     useEffect(() => {
-        if (photo && isOpen) {
+        if (photo && isOpen && !isVideo) { // Only fetch related for photos
             const fetchRelated = async () => {
                 setLoadingRelated(true);
                 try {
@@ -27,9 +29,12 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
             setRelatedArtist([]);
             setRelatedVisual([]);
         }
-    }, [photo, isOpen]);
+    }, [photo, isOpen, isVideo]);
 
     if (!photo || !isOpen) return null;
+
+    // Get video source if it is a video
+    const videoFile = isVideo ? (photo.video_files.find(f => f.quality === 'hd') || photo.video_files[0]) : null;
 
     return (
         <AnimatePresence>
@@ -55,12 +60,22 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
                     </button>
 
                     <div className="flex-1 bg-[#0f0f0f] flex items-center justify-center p-4 md:p-0 overflow-hidden relative group">
-                        <img
-                            src={photo.src.large2x}
-                            alt={photo.alt}
-                            className="max-w-full max-h-full object-contain cursor-zoom-out shadow-2xl"
-                            onClick={onClose}
-                        />
+                        {isVideo ? (
+                            <video
+                                src={videoFile?.link}
+                                poster={photo.image}
+                                controls
+                                autoPlay
+                                className="max-w-full max-h-full object-contain shadow-2xl"
+                            />
+                        ) : (
+                            <img
+                                src={photo.src.large2x}
+                                alt={photo.alt}
+                                className="max-w-full max-h-full object-contain cursor-zoom-out shadow-2xl"
+                                onClick={onClose}
+                            />
+                        )}
                     </div>
 
                     <div className="w-full md:w-[450px] flex flex-col bg-designer-card overflow-hidden border-l border-designer-border">
@@ -77,14 +92,14 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
 
                             <div className="flex items-center gap-4 p-5 rounded-2xl bg-designer-bg/30 border border-designer-border mb-8 group hover:border-designer-accent/30 transition-all">
                                 <div className="w-12 h-12 rounded-full bg-designer-accent text-designer-bg flex items-center justify-center font-bold">
-                                    {photo.photographer.charAt(0)}
+                                    {(photo.photographer || photo.user.name).charAt(0)}
                                 </div>
                                 <div className="flex-1">
                                     <p className="text-designer-muted text-[10px] font-bold uppercase tracking-widest mb-1">Contributor</p>
-                                    <p className="text-designer-text font-bold text-lg leading-tight">{photo.photographer}</p>
+                                    <p className="text-designer-text font-bold text-lg leading-tight">{photo.photographer || photo.user.name}</p>
                                 </div>
                                 <a
-                                    href={photo.photographer_url}
+                                    href={photo.photographer_url || photo.user.url}
                                     target="_blank"
                                     rel="noreferrer"
                                     className="p-2.5 bg-designer-bg rounded-xl border border-designer-border text-designer-muted hover:text-designer-accent transition-all"
@@ -100,11 +115,15 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
                                         <p className="text-designer-secondary font-bold text-sm">{photo.width} × {photo.height} PX</p>
                                     </div>
                                     <div>
-                                        <p className="text-designer-muted text-[10px] font-bold uppercase tracking-widest mb-2">Chroma ID</p>
-                                        <div className="flex gap-2">
-                                            <div className="w-5 h-5 rounded-md border border-designer-border shadow-sm" style={{ backgroundColor: photo.avg_color }}></div>
-                                            <span className="text-designer-secondary font-mono text-xs self-center font-bold uppercase">{photo.avg_color}</span>
-                                        </div>
+                                        <p className="text-designer-muted text-[10px] font-bold uppercase tracking-widest mb-2">{isVideo ? 'Duration' : 'Chroma ID'}</p>
+                                        {isVideo ? (
+                                            <p className="text-designer-secondary font-bold text-sm">{photo.duration}s</p>
+                                        ) : (
+                                            <div className="flex gap-2">
+                                                <div className="w-5 h-5 rounded-md border border-designer-border shadow-sm" style={{ backgroundColor: photo.avg_color }}></div>
+                                                <span className="text-designer-secondary font-mono text-xs self-center font-bold uppercase">{photo.avg_color}</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 
@@ -117,46 +136,48 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
                             </div>
 
                             <div className="pt-8 border-t border-designer-border space-y-8">
-                                {loadingRelated ? (
-                                    <div className="flex justify-center py-6">
-                                        <Loader2 size={24} className="text-designer-accent animate-spin" />
-                                    </div>
-                                ) : (
-                                    <>
-                                        {relatedArtist.length > 0 && (
-                                            <div>
-                                                <h3 className="text-[10px] font-bold text-designer-muted mb-4 uppercase tracking-widest opacity-50">More from {photo.photographer}</h3>
-                                                <div className="grid grid-cols-3 gap-2">
-                                                    {relatedArtist.slice(0, 6).map(p => (
-                                                        <div
-                                                            key={p.id}
-                                                            onClick={() => onSelectPhoto(p)}
-                                                            className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
-                                                        >
-                                                            <img src={p.src.tiny} alt={p.alt} className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
-                                                        </div>
-                                                    ))}
+                                {!isVideo && (
+                                    loadingRelated ? (
+                                        <div className="flex justify-center py-6">
+                                            <Loader2 size={24} className="text-designer-accent animate-spin" />
+                                        </div>
+                                    ) : (
+                                        <>
+                                            {relatedArtist.length > 0 && (
+                                                <div>
+                                                    <h3 className="text-[10px] font-bold text-designer-muted mb-4 uppercase tracking-widest opacity-50">More from {photo.photographer}</h3>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        {relatedArtist.slice(0, 6).map(p => (
+                                                            <div
+                                                                key={p.id}
+                                                                onClick={() => onSelectPhoto(p)}
+                                                                className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
+                                                            >
+                                                                <img src={p.src.tiny} alt={p.alt} className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
+                                            )}
 
-                                        {relatedVisual.length > 0 && (
-                                            <div>
-                                                <h3 className="text-[10px] font-bold text-designer-muted mb-4 uppercase tracking-widest opacity-50">Similar Visuals</h3>
-                                                <div className="grid grid-cols-3 gap-2">
-                                                    {relatedVisual.slice(0, 6).map(p => (
-                                                        <div
-                                                            key={p.id}
-                                                            onClick={() => onSelectPhoto(p)}
-                                                            className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
-                                                        >
-                                                            <img src={p.src.tiny} alt={p.alt} className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
-                                                        </div>
-                                                    ))}
+                                            {relatedVisual.length > 0 && (
+                                                <div>
+                                                    <h3 className="text-[10px] font-bold text-designer-muted mb-4 uppercase tracking-widest opacity-50">Similar Visuals</h3>
+                                                    <div className="grid grid-cols-3 gap-2">
+                                                        {relatedVisual.slice(0, 6).map(p => (
+                                                            <div
+                                                                key={p.id}
+                                                                onClick={() => onSelectPhoto(p)}
+                                                                className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
+                                                            >
+                                                                <img src={p.src.tiny} alt={p.alt} className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        )}
-                                    </>
+                                            )}
+                                        </>
+                                    )
                                 )}
                             </div>
                         </div>
@@ -167,7 +188,7 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
                                 className="w-full flex items-center justify-center gap-3 bg-designer-accent text-designer-bg py-4 rounded-2xl font-bold hover:bg-designer-accent-hover transition-all shadow-xl active:scale-95"
                             >
                                 <Download size={20} />
-                                Download Master
+                                {isVideo ? 'Download HD Video' : 'Download Master'}
                             </button>
 
                             <button

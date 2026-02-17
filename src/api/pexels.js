@@ -67,3 +67,31 @@ export const getRelatedPhotos = async (photo, perPage = 15) => {
         return { artist: [], visual: [] };
     }
 };
+
+export const searchVideos = async (query, perPage = 30, page = 1, filters = {}) => {
+    try {
+        const params = {
+            query,
+            per_page: perPage,
+            page,
+            ...filters
+        };
+        const response = await client.get('/videos/search', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error searching videos:', error);
+        throw error;
+    }
+};
+
+export const getPopularVideos = async (perPage = 30, page = 1) => {
+    try {
+        const response = await client.get('/videos/popular', {
+            params: { per_page: perPage, page },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching popular videos:', error);
+        throw error;
+    }
+};
