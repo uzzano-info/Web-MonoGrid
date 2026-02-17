@@ -46,7 +46,7 @@ const Community = () => {
                         <h2 className="text-lg font-bold text-designer-text mb-2">Buy me a Coffee</h2>
                         <p className="text-sm text-designer-muted mb-6 px-4">Support the development of MonoGrid. Your contribution helps keep the servers running!</p>
                         <a
-                            href="#"
+                            href="https://buymeacoffee.com/uzzano"
                             target="_blank"
                             rel="noreferrer"
                             className="w-full py-3 bg-[#FFDD00] hover:bg-[#ffe44d] text-amber-900 font-bold rounded-xl transition-all active:scale-95 shadow-md flex items-center justify-center gap-2"
