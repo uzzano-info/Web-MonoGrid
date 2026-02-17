@@ -95,3 +95,37 @@ export const getPopularVideos = async (perPage = 30, page = 1) => {
         throw error;
     }
 };
+
+export const getRelatedVideos = async (video, perPage = 15) => {
+    try {
+        // Strategy 1: Search by artist (video.user.name)
+        const artistName = video.user?.name || 'Nature';
+        const artistPromise = client.get('/videos/search', {
+            params: { query: artistName, per_page: perPage }
+        });
+
+        // Strategy 2: Search by keywords from URL slug
+        // Example URL: https://www.pexels.com/video/a-beautiful-waterfall-852421/
+        // Slug keywords: "beautiful waterfall"
+        let similarityQuery = 'abstract';
+        if (video.url) {
+            const urlParts = video.url.split('/');
+            const slug = urlParts[urlParts.length - 2] || '';
+            similarityQuery = slug.replace(/-/g, ' ').replace(/\d+/g, '').trim() || 'nature';
+        }
+
+        const visualPromise = client.get('/videos/search', {
+            params: { query: similarityQuery, per_page: perPage }
+        });
+
+        const [artistRes, visualRes] = await Promise.all([artistPromise, visualPromise]);
+
+        return {
+            artist: (artistRes.data.videos || []).filter(v => v.id !== video.id),
+            visual: (visualRes.data.videos || []).filter(v => v.id !== video.id)
+        };
+    } catch (error) {
+        console.error('Error fetching related videos:', error);
+        return { artist: [], visual: [] };
+    }
+};
