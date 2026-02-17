@@ -134,6 +134,13 @@ function Home() {
                     </div>
                     <div className="flex items-center gap-6">
                         <button
+                            onClick={() => navigate('/community')}
+                            className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-2"
+                        >
+                            <span>Community</span>
+                        </button>
+                        <div className="h-4 w-px bg-designer-border"></div>
+                        <button
                             onClick={() => openCollectionModal([])}
                             className="bg-designer-accent text-designer-bg px-4 py-2 rounded-lg text-sm font-bold hover:bg-designer-accent-hover transition-all flex items-center gap-2 shadow-lg active:scale-95"
                         >
