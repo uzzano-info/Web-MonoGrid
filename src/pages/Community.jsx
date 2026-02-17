@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, MessageSquare, ThumbsUp, Send, Coffee, MessageCircle, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useCommunityStore from '../store/useCommunityStore';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 const Community = () => {
     const navigate = useNavigate();

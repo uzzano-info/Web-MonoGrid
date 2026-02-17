@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 
 const useCommunityStore = create(
     persist(
-        (set, get) => ({
+        (set) => ({
             posts: [
                 {
                     id: '1',

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Download, X, FolderPlus } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence } from 'framer-motion';
 
 const ActionDock = ({ selectedCount, onClear, onDownload, processing, onAddToCollection }) => {
     return (

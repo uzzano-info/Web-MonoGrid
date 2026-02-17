@@ -8,7 +8,9 @@ const CollectionDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { collections } = useCollectionStore();
-    const [collection, setCollection] = useState(null);
+    // Derived state instead of useEffect sync
+    const collection = collections.find(c => c.id === id);
+
     const [selectedPhotos, setSelectedPhotos] = useState([]);
     const [processing, setProcessing] = useState(false);
     const scrollRef = useRef(null);
@@ -21,11 +23,11 @@ const CollectionDetail = () => {
     const [viewMode, setViewMode] = useState('grid');
 
     useEffect(() => {
-        const found = collections.find(c => c.id === id);
-        if (found) {
-            setCollection(found);
+        if (!collection && collections.length > 0) {
+            // Handle 404 or redirect if needed, but for now just logging or leaving as is
+            // If collection not found but collections exist, maybe invalid ID
         }
-    }, [id, collections]);
+    }, [id, collection, collections]);
 
     if (!collection) return <div className="min-h-screen bg-designer-bg flex items-center justify-center text-white">Loading...</div>;
 

@@ -3,7 +3,7 @@ import PhotoCard from './PhotoCard';
 import { useInView } from 'react-intersection-observer';
 
 const PhotoGrid = ({ photos, loading, hasNextPage, onLoadMore, selectedPhotos, onToggleSelect, onDownload, onPhotoClick }) => {
-    const { ref, inView } = useInView({
+    const { ref } = useInView({
         threshold: 0,
         onChange: (inView) => {
             if (inView && hasNextPage && !loading) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Download, Plus, Check, Maximize2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+
 
 const PhotoCard = ({ photo, isSelected, onToggleSelect, onDownload, onPhotoClick }) => {
     return (
