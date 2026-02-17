@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ArrowLeft, MessageSquare, ThumbsUp, Send, Coffee, MessageCircle, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useCommunityStore from '../store/useCommunityStore';
-import { AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { Helmet } from 'react-helmet-async';
 
 const Community = () => {

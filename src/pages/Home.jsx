@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { getCuratedPhotos, searchPhotos } from '../api/pexels';
 import SearchBar from '../components/SearchBar';
 import PhotoGrid from '../components/PhotoGrid';

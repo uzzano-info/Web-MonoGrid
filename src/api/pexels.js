@@ -36,3 +36,34 @@ export const getCuratedPhotos = async (perPage = 30, page = 1) => {
         throw error;
     }
 };
+
+export const getRelatedPhotos = async (photo, perPage = 15) => {
+    try {
+        // Strategy 1: Search by photographer
+        const photographerPromise = client.get('/search', {
+            params: { query: photo.photographer, per_page: perPage }
+        });
+
+        // Strategy 2: Search by alt text key terms (simple heuristic: first 3 words or full alt if short)
+        // Check if alt is defined and invalid/empty, if so use a fallback or skip
+        let altQuery = 'abstract';
+        if (photo.alt) {
+            const words = photo.alt.split(' ');
+            altQuery = words.length > 4 ? words.slice(0, 4).join(' ') : photo.alt;
+        }
+
+        const visualPromise = client.get('/search', {
+            params: { query: altQuery, per_page: perPage }
+        });
+
+        const [photographerRes, visualRes] = await Promise.all([photographerPromise, visualPromise]);
+
+        return {
+            artist: photographerRes.data.photos.filter(p => p.id !== photo.id),
+            visual: visualRes.data.photos.filter(p => p.id !== photo.id)
+        };
+    } catch (error) {
+        console.error('Error fetching related photos:', error);
+        return { artist: [], visual: [] };
+    }
+};

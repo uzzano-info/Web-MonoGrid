@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { X, ExternalLink, Download, FolderPlus, Loader2 } from 'lucide-react';
-import { searchPhotos } from '../api/pexels';
+import { getRelatedPhotos } from '../api/pexels';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollection, onSelectPhoto }) => {
-    const [relatedPhotos, setRelatedPhotos] = useState([]);
+    const [relatedArtist, setRelatedArtist] = useState([]);
+    const [relatedVisual, setRelatedVisual] = useState([]);
     const [loadingRelated, setLoadingRelated] = useState(false);
 
     useEffect(() => {
@@ -11,9 +13,9 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
             const fetchRelated = async () => {
                 setLoadingRelated(true);
                 try {
-                    const query = photo.alt || photo.photographer;
-                    const data = await searchPhotos(query, 6, 1);
-                    setRelatedPhotos(data.photos.filter(p => p.id !== photo.id));
+                    const { artist, visual } = await getRelatedPhotos(photo);
+                    setRelatedArtist(artist);
+                    setRelatedVisual(visual);
                 } catch (error) {
                     console.error('Error fetching related photos:', error);
                 } finally {
@@ -22,7 +24,8 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
             };
             fetchRelated();
         } else {
-            setRelatedPhotos([]);
+            setRelatedArtist([]);
+            setRelatedVisual([]);
         }
     }, [photo, isOpen]);
 
@@ -113,24 +116,47 @@ const PhotoDetailModal = ({ photo, isOpen, onClose, onDownload, onAddToCollectio
                                 )}
                             </div>
 
-                            <div className="pt-8 border-t border-designer-border">
-                                <h3 className="text-[10px] font-bold text-designer-muted mb-5 uppercase tracking-widest opacity-50">Related Elements</h3>
+                            <div className="pt-8 border-t border-designer-border space-y-8">
                                 {loadingRelated ? (
                                     <div className="flex justify-center py-6">
                                         <Loader2 size={24} className="text-designer-accent animate-spin" />
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-3 gap-2">
-                                        {relatedPhotos.map(p => (
-                                            <div
-                                                key={p.id}
-                                                onClick={() => onSelectPhoto(p)}
-                                                className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
-                                            >
-                                                <img src={p.src.tiny} alt="" className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
+                                    <>
+                                        {relatedArtist.length > 0 && (
+                                            <div>
+                                                <h3 className="text-[10px] font-bold text-designer-muted mb-4 uppercase tracking-widest opacity-50">More from {photo.photographer}</h3>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {relatedArtist.slice(0, 6).map(p => (
+                                                        <div
+                                                            key={p.id}
+                                                            onClick={() => onSelectPhoto(p)}
+                                                            className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
+                                                        >
+                                                            <img src={p.src.tiny} alt={p.alt} className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
+                                        )}
+
+                                        {relatedVisual.length > 0 && (
+                                            <div>
+                                                <h3 className="text-[10px] font-bold text-designer-muted mb-4 uppercase tracking-widest opacity-50">Similar Visuals</h3>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {relatedVisual.slice(0, 6).map(p => (
+                                                        <div
+                                                            key={p.id}
+                                                            onClick={() => onSelectPhoto(p)}
+                                                            className="aspect-square rounded-xl overflow-hidden border border-designer-border bg-designer-bg group/item relative cursor-pointer"
+                                                        >
+                                                            <img src={p.src.tiny} alt={p.alt} className="w-full h-full object-cover opacity-60 group-hover/item:opacity-100 transition-all group-hover/item:scale-110" />
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         </div>
