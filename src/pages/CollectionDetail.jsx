@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
-import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check, X, Film } from 'lucide-react';
+import { ArrowLeft, CheckSquare, Download, Grid, List, Settings, Trash2, ToggleRight, ToggleLeft, Monitor, Smartphone, Square, Maximize, FileImage, Image as ImageIcon, Check, X, Film, PlayCircle } from 'lucide-react';
 import useCollectionStore from '../store/useCollectionStore';
 import { downloadPhotosAsZip } from '../utils/downloadZip';
 import { Helmet } from 'react-helmet-async';
+import PhotoDetailModal from '../components/PhotoDetailModal';
+import { saveAs } from 'file-saver';
 
 const CollectionDetail = () => {
     const { id } = useParams();
@@ -18,10 +20,11 @@ const CollectionDetail = () => {
 
     const [selectedItems, setSelectedItems] = useState([]);
     const [processing, setProcessing] = useState(false);
+    const [selectedAssetForDetail, setSelectedAssetForDetail] = useState(null);
     const scrollRef = useRef(null);
 
     // Batch Config State
-    const [format, setFormat] = useState('JPG');
+    const [format, setFormat] = useState(type === 'videos' ? 'MP4' : 'JPG');
     const [size, setSize] = useState('Original');
 
     const [itemsToShow, setItemsToShow] = useState(20);
@@ -33,7 +36,8 @@ const CollectionDetail = () => {
 
     const displayedItems = collection.items.slice(0, itemsToShow);
 
-    const toggleSelect = (itemId) => {
+    const toggleSelect = (itemId, e) => {
+        e?.stopPropagation();
         if (selectedItems.includes(itemId)) {
             setSelectedItems(selectedItems.filter(id => id !== itemId));
         } else {
@@ -77,6 +81,20 @@ const CollectionDetail = () => {
         );
 
         setProcessing(false);
+    };
+
+    const handleSingleDownload = async (asset) => {
+        try {
+            const url = isVideoMode
+                ? (asset.video_files?.find(f => f.quality === 'hd')?.link || asset.video_files?.[0]?.link)
+                : asset.src?.original;
+
+            if (url) {
+                saveAs(url, `monogrid-${asset.id}.${isVideoMode ? 'mp4' : 'jpg'}`);
+            }
+        } catch (error) {
+            console.error("Download failed", error);
+        }
     };
 
     return (
@@ -144,7 +162,7 @@ const CollectionDetail = () => {
                                 return (
                                     <div
                                         key={item.id}
-                                        onClick={() => toggleSelect(item.id)}
+                                        onClick={() => setSelectedAssetForDetail(item)}
                                         className={`aspect-square bg-designer-card rounded-xl border p-2 group relative cursor-pointer transition-all duration-300 ${isSelected ? 'border-designer-accent shadow-[0_0_20px_rgba(230,228,224,0.1)] ring-1 ring-designer-accent' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
                                         <div className="w-full h-full rounded-lg overflow-hidden relative bg-[#0f0f0f]">
@@ -155,19 +173,30 @@ const CollectionDetail = () => {
                                             />
 
                                             {isVideoMode && (
-                                                <div className="absolute top-2 right-2 p-1.5 bg-black/50 backdrop-blur-md rounded-lg text-white/70">
-                                                    <Film size={14} />
+                                                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                                                    <div className="w-12 h-12 bg-black/50 backdrop-blur-md rounded-full flex items-center justify-center text-white">
+                                                        <PlayCircle size={24} fill="white" className="text-transparent" />
+                                                    </div>
                                                 </div>
                                             )}
 
                                             <div className={`absolute inset-0 bg-designer-accent/5 transition-opacity duration-300 ${isSelected ? 'opacity-100' : 'opacity-0'}`}></div>
 
-                                            {/* Checkbox Overlay */}
-                                            <div className={`absolute top-2 left-2 transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-90 group-hover:opacity-100'}`}>
-                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center border shadow-lg ${isSelected ? 'bg-designer-accent text-designer-bg border-designer-accent' : 'bg-designer-bg/50 border-white/20 backdrop-blur-md'}`}>
+                                            {/* Checkbox Overlay - Clicking THIS toggles selection */}
+                                            <div
+                                                onClick={(e) => toggleSelect(item.id, e)}
+                                                className={`absolute top-2 left-2 z-20 transition-all duration-300 ${isSelected ? 'opacity-100 scale-100' : 'opacity-0 scale-90 group-hover:opacity-100'}`}
+                                            >
+                                                <div className={`w-6 h-6 rounded-lg flex items-center justify-center border shadow-lg ${isSelected ? 'bg-designer-accent text-designer-bg border-designer-accent' : 'bg-designer-bg/50 border-white/20 backdrop-blur-md hover:bg-designer-accent hover:border-designer-accent hover:text-designer-bg'}`}>
                                                     {isSelected && <Check size={14} strokeWidth={3} />}
                                                 </div>
                                             </div>
+
+                                            {isVideoMode && (
+                                                <div className="absolute top-2 right-2 p-1.5 bg-black/50 backdrop-blur-md rounded-lg text-white/70 pointer-events-none">
+                                                    <Film size={14} />
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 );
@@ -184,7 +213,7 @@ const CollectionDetail = () => {
                                 return (
                                     <div
                                         key={item.id}
-                                        onClick={() => toggleSelect(item.id)}
+                                        onClick={() => setSelectedAssetForDetail(item)}
                                         className={`flex items-center gap-4 bg-designer-card p-2 rounded-xl border transition-all cursor-pointer group ${isSelected ? 'border-designer-accent bg-designer-accent/5' : 'border-designer-border hover:border-designer-muted'}`}
                                     >
                                         <div className="w-16 h-16 rounded-lg overflow-hidden bg-black/20 shrink-0 relative">
@@ -199,6 +228,14 @@ const CollectionDetail = () => {
                                             <h4 className="font-bold text-designer-text truncate text-sm">{item.alt || 'Untitled Asset'}</h4>
                                             <p className="text-xs text-designer-muted">by {item.photographer || item.user?.name}</p>
                                         </div>
+
+                                        <button
+                                            onClick={(e) => toggleSelect(item.id, e)}
+                                            className={`p-2 rounded-lg border transition-all mr-2 ${isSelected ? 'bg-designer-accent text-designer-bg border-designer-accent' : 'border-designer-border text-designer-muted hover:border-designer-text'}`}
+                                        >
+                                            <Check size={16} />
+                                        </button>
+
                                         <div className="px-4 text-[10px] font-mono text-designer-muted">
                                             {isVideoMode ? `${item.duration}s` : `${item.width} x ${item.height}`}
                                         </div>
@@ -223,7 +260,7 @@ const CollectionDetail = () => {
             </main>
 
             {/* Right Sidebar (Batch Configuration) */}
-            <div className="w-[320px] bg-designer-card border-l border-designer-border h-full shrink-0 flex flex-col shadow-2xl relative z-20">
+            <div className="w-[320px] bg-designer-card border-l border-designer-border h-full shrink-0 flex flex-col shadow-2xl relative z-20 hidden md:flex">
                 <div className="p-5 border-b border-designer-border bg-designer-modal/50">
                     <div className="flex justify-between items-center mb-1">
                         <h2 className="font-bold text-designer-text text-xs uppercase tracking-[0.2em]">Batch Parameters</h2>
@@ -315,6 +352,15 @@ const CollectionDetail = () => {
                     <p className="text-center text-[10px] text-designer-muted mt-4 cursor-pointer hover:text-designer-text font-black uppercase tracking-[0.2em] transition-colors" onClick={() => navigate('/')}>Return to Hub</p>
                 </div>
             </div>
+
+            <PhotoDetailModal
+                photo={selectedAssetForDetail}
+                isOpen={!!selectedAssetForDetail}
+                onClose={() => setSelectedAssetForDetail(null)}
+                onDownload={handleSingleDownload}
+                onAddToCollection={() => { }} // Disabled in archive view
+                onSelectPhoto={setSelectedAssetForDetail}
+            />
         </div >
     );
 };

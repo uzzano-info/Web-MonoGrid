@@ -38,6 +38,14 @@ const ExploreDetail = () => {
             if (isNew) {
                 setPhotos(newPhotos);
                 setVideos(newVideos);
+
+                // Smart Tab Selection: Default to Videos if no photos are present
+                if (newPhotos.length === 0 && newVideos.length > 0) {
+                    setActiveTab('videos');
+                } else {
+                    setActiveTab('photos');
+                }
+
                 setPage(2);
             } else {
                 setPhotos(prev => [...prev, ...newPhotos]);

@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { getFeaturedCollections } from '../api/pexels';
 import { ArrowLeft, Compass, LayoutGrid, ChevronRight, Folder } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ExploreCard from '../components/ExploreCard';
 
 const Explore = () => {
     const navigate = useNavigate();
@@ -67,39 +68,7 @@ const Explore = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {collections.map((col, idx) => (
-                        <motion.div
-                            key={col.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: idx * 0.05 }}
-                            onClick={() => navigate(`/explore/${col.id}?title=${encodeURIComponent(col.title)}`)}
-                            className="group bg-designer-card border border-designer-border rounded-2xl overflow-hidden cursor-pointer hover:border-designer-accent/50 transition-all shadow-xl hover:shadow-designer-accent/5 active:scale-[0.98]"
-                        >
-                            <div className="aspect-[16/10] bg-designer-bg relative overflow-hidden flex items-center justify-center">
-                                <Folder className="text-designer-muted opacity-20 group-hover:scale-110 transition-transform duration-500" size={64} />
-                                <div className="absolute inset-0 bg-gradient-to-t from-designer-bg via-transparent to-transparent opacity-60"></div>
-                                <div className="absolute top-4 left-4">
-                                    <span className="bg-designer-accent/10 text-designer-accent text-[8px] font-black px-2 py-1 rounded uppercase tracking-[0.2em] border border-designer-accent/20">
-                                        INDEXED // {col.media_count} ELEMENTS
-                                    </span>
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <h3 className="text-xl font-bold mb-2 group-hover:text-designer-accent transition-colors">{col.title}</h3>
-                                <p className="text-sm text-designer-muted line-clamp-2 mb-4 h-10 font-medium">{col.description || 'Curated thematic collection for high-end design inspiration.'}</p>
-                                <div className="flex items-center justify-between pt-4 border-t border-designer-border/50">
-                                    <div className="flex gap-4">
-                                        <div className="text-[10px] font-bold text-designer-muted uppercase tracking-tighter">
-                                            <span className="text-designer-text">{col.photos_count}</span> Photos
-                                        </div>
-                                        <div className="text-[10px] font-bold text-designer-muted uppercase tracking-tighter">
-                                            <span className="text-designer-text">{col.videos_count}</span> Videos
-                                        </div>
-                                    </div>
-                                    <ChevronRight className="text-designer-muted group-hover:text-designer-accent group-hover:translate-x-1 transition-all" size={20} />
-                                </div>
-                            </div>
-                        </motion.div>
+                        <ExploreCard key={col.id} collection={col} index={idx} />
                     ))}
 
                     {loading && Array.from({ length: 6 }).map((_, i) => (

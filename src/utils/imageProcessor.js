@@ -35,7 +35,10 @@ export const convertImageFormat = async (blob, format) => {
         if (blob.type === 'image/jpeg') return blob;
     }
 
-    const mimeType = `image/${format.toLowerCase()}`;
+    const mimeType = format.toUpperCase() === 'JPG' || format.toUpperCase() === 'JPEG'
+        ? 'image/jpeg'
+        : `image/${format.toLowerCase()}`;
+
     if (blob.type === mimeType) return blob;
 
     return new Promise((resolve, reject) => {

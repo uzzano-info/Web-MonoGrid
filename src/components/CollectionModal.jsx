@@ -9,12 +9,26 @@ const CollectionModal = ({ isOpen, onClose, photosToAdd }) => {
     const [newCollectionName, setNewCollectionName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
 
+    // Internal type toggle for browsing
+    const [viewType, setViewType] = useState(null);
+
     if (!isOpen) return null;
 
-    // Determine asset type
-    const isVideoMode = photosToAdd.length > 0 && photosToAdd[0].video_files;
+    // Determine asset type or use internal toggle
+    const isAddingAssets = photosToAdd && photosToAdd.length > 0;
+    const isVideoMode = isAddingAssets
+        ? !!photosToAdd[0].video_files
+        : (viewType === 'videos');
+
+    // Sync viewType if adding assets
     const type = isVideoMode ? 'videos' : 'photos';
     const collections = isVideoMode ? videoCollections : photoCollections;
+
+    const handleTypeSwitch = (newType) => {
+        if (!isAddingAssets) {
+            setViewType(newType);
+        }
+    };
 
     const handleCreate = (e) => {
         e.preventDefault();
@@ -39,13 +53,32 @@ const CollectionModal = ({ isOpen, onClose, photosToAdd }) => {
                 className="bg-designer-modal border border-designer-border w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-300"
                 onClick={(e) => e.stopPropagation()}
             >
-                <div className="flex justify-between items-center p-5 border-b border-designer-border bg-designer-card/50">
-                    <h3 className="text-lg font-bold text-designer-text tracking-tight uppercase tracking-widest text-xs opacity-70">
-                        {isVideoMode ? 'Video Archives' : 'Photo Archives'}
-                    </h3>
-                    <button onClick={onClose} className="text-designer-muted hover:text-designer-text transition-colors">
-                        <X size={20} />
-                    </button>
+                <div className="p-5 border-b border-designer-border bg-designer-card/50 flex flex-col gap-4">
+                    <div className="flex justify-between items-center">
+                        <h3 className="text-lg font-bold text-designer-text tracking-tight uppercase tracking-widest text-[10px] opacity-70">
+                            {isAddingAssets ? `Indexing // Archive to ${type}` : 'Archive Management'}
+                        </h3>
+                        <button onClick={onClose} className="text-designer-muted hover:text-designer-text transition-colors">
+                            <X size={20} />
+                        </button>
+                    </div>
+
+                    {!isAddingAssets && (
+                        <div className="flex bg-designer-bg p-1 rounded-xl border border-designer-border shadow-inner">
+                            <button
+                                onClick={() => handleTypeSwitch('photos')}
+                                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${!isVideoMode ? 'bg-designer-accent text-designer-bg shadow-lg' : 'text-designer-muted hover:text-designer-text'}`}
+                            >
+                                Photo Tracks
+                            </button>
+                            <button
+                                onClick={() => handleTypeSwitch('videos')}
+                                className={`flex-1 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all ${isVideoMode ? 'bg-designer-accent text-designer-bg shadow-lg' : 'text-designer-muted hover:text-designer-text'}`}
+                            >
+                                Motion Tracks
+                            </button>
+                        </div>
+                    )}
                 </div>
 
                 <div className="p-4 max-h-[60vh] overflow-y-auto space-y-2 custom-scrollbar">

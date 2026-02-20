@@ -15,22 +15,29 @@ export const downloadPhotosAsZip = async (photos, filename = 'pexels-collection.
 
     const promises = photos.map(async (photo) => {
         try {
-            // 1. Get correct URL based on size
-            const targetUrl = getImageUrlBySize(photo.src, options.size);
+            let blob;
+            let extension;
 
-            // 2. Fetch Blob
-            let blob = await fetchBlob(targetUrl);
+            if (photo.video_files) {
+                // Handle Video
+                const quality = options.size === 'HD' ? 'hd' : 'sd';
+                const videoFile = photo.video_files.find(f => f.quality === quality) || photo.video_files[0];
+                blob = await fetchBlob(videoFile.link);
+                extension = 'mp4';
+            } else {
+                // Handle Photo
+                const targetUrl = getImageUrlBySize(photo.src, options.size);
+                blob = await fetchBlob(targetUrl);
+                const processedBlob = await convertImageFormat(blob, options.format);
+                blob = processedBlob;
+                extension = options.format.toLowerCase();
+                if (extension === 'jpg') extension = 'jpeg'; // Normalize for mime/consistency if needed, though 'jpg' is fine for extension
+            }
 
-            // 4. Convert Format if needed
-            const convertedBlob = await convertImageFormat(blob, options.format);
-
-            // 5. Determine extension
-            const extension = options.format.toLowerCase();
-            const name = `${photo.id}-${photo.photographer.replace(/\s+/g, '-').toLowerCase()}.${extension}`;
-
-            folder.file(name, convertedBlob);
+            const name = `${photo.id}-${(photo.photographer || 'pexels').replace(/\s+/g, '-').toLowerCase()}.${extension}`;
+            folder.file(name, blob);
         } catch (error) {
-            console.error(`Error processing photo ${photo.id}:`, error);
+            console.error(`Error processing asset ${photo.id}:`, error);
         }
     });
 

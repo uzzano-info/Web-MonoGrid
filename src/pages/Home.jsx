@@ -168,8 +168,8 @@ function Home() {
 
             <header className="fixed top-0 left-0 right-0 z-[50] bg-designer-bg/80 backdrop-blur-md border-b border-designer-border px-8 py-3 translate-z-0">
                 <div className="max-w-7xl mx-auto flex justify-between items-center text-sm md:text-base">
-                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo(0, 0)}>
-                        <div className="w-8 h-8 bg-designer-accent rounded-lg flex items-center justify-center font-bold text-designer-bg shadow-[0_0_15px_rgba(230,228,224,0.3)]">M</div>
+                    <div className="flex items-center gap-2 cursor-pointer" onClick={() => navigate('/')}>
+                        <img src="/logo-large.png" alt="MonoGrid Logo" className="w-8 h-8 rounded-lg shadow-[0_0_15px_rgba(230,228,224,0.3)] object-cover" />
                         <h1 className="text-xl font-bold tracking-tight text-designer-text hidden sm:block">
                             <span className="text-designer-accent">Mono</span>Grid
                         </h1>
@@ -177,28 +177,36 @@ function Home() {
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate('/community')}
-                            className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-2"
+                            className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-designer-card"
                         >
                             <span>Community</span>
                         </button>
-                        <div className="h-4 w-px bg-designer-border"></div>
                         <button
                             onClick={() => navigate('/explore')}
-                            className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-2"
+                            className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-1.5 px-2 py-1 rounded-lg hover:bg-designer-card"
                         >
                             <span>Explore</span>
                         </button>
                         <div className="h-4 w-px bg-designer-border"></div>
-                        <button
-                            onClick={() => openCollectionModal([])}
-                            className="bg-designer-accent text-designer-bg px-4 py-2 rounded-lg text-sm font-bold hover:bg-designer-accent-hover transition-all flex items-center gap-2 shadow-lg active:scale-95"
-                        >
-                            <FolderPlus size={18} />
-                            <span>Collections</span>
-                        </button>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => { setAssetsToAdd([]); setIsCollectionModalOpen(true); }}
+                                className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-designer-card border border-transparent hover:border-designer-border"
+                            >
+                                <ImageIcon size={16} className="text-designer-accent" />
+                                <span className="hidden lg:inline">Photos</span>
+                            </button>
+                            <button
+                                onClick={() => { setAssetsToAdd([{ video_files: [] }]); setIsCollectionModalOpen(true); }}
+                                className="text-designer-muted hover:text-designer-text transition-colors text-sm font-bold flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-designer-card border border-transparent hover:border-designer-border"
+                            >
+                                <Film size={16} className="text-designer-accent" />
+                                <span className="hidden lg:inline">Videos</span>
+                            </button>
+                        </div>
                         <div className="h-4 w-px bg-designer-border"></div>
-                        <div className="text-sm font-medium text-designer-muted bg-designer-card px-3 py-1 rounded-full border border-designer-border">
-                            <span className="text-designer-accent font-bold">{selectedAssets.length}</span> selected
+                        <div className="text-sm font-medium text-designer-muted bg-designer-card px-3 py-1.5 rounded-full border border-designer-border">
+                            <span className="text-designer-accent font-bold">{selectedAssets.length}</span> <span className="hidden sm:inline">selected</span>
                         </div>
                     </div>
                 </div>
